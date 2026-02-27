@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Only audit direct dependencies; transitive vulns from EPiServer are outside our control -->
+    <NuGetAuditMode>direct</NuGetAuditMode>
+    <!-- NU1608: Castle.Core version conflict between NSubstitute 5.x and EPiServer (known, harmless) -->
+    <NoWarn>NU1608</NoWarn>
+  </PropertyGroup>
+</Project>

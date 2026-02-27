@@ -1,0 +1,32 @@
+@{
+    Layout = string.Empty;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@ViewBag.DashboardTitle</title>
+    @ClientResources.RenderResources("ShellCore")
+    @ClientResources.RenderResources("ShellCoreLightTheme")
+    <style>
+        html, body, .iframe-container {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    @Html.CreatePlatformNavigationMenu()
+    <div @Html.ApplyPlatformNavigation(additionalClass: "iframe-container")>
+        <iframe src="@ViewBag.DashboardPath" title="@ViewBag.DashboardTitle">
+            <p>Your browser does not support iframes.</p>
+        </iframe>
+    </div>
+</body>
+</html>

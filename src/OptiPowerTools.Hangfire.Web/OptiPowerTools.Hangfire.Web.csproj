@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Foundation uses BinaryFormatter (Commerce) which was removed in .NET 9; target .NET 8 for dev site -->
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- NU1605: Package downgrade warnings from Foundation (net6.0) referenced in net8.0 host -->
+    <NoWarn>$(NoWarn);NU1605</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\sub\foundation\src\Foundation\Foundation.csproj" />
+    <ProjectReference Include="..\OptiPowerTools.Hangfire\OptiPowerTools.Hangfire.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
+  </ItemGroup>
+
+</Project>

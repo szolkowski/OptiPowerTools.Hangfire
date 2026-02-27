@@ -1,0 +1,8 @@
+<Project>
+  <!-- Override root Directory.Build.props for submodule projects.
+       Submodules have their own build conventions that we should not override. -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+</Project>
