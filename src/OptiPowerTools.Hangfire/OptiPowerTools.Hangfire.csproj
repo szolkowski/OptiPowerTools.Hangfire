@@ -1,22 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net10.0</TargetFrameworks>
 
     <!-- NuGet Package Metadata -->
     <PackageId>OptiPowerTools.Hangfire</PackageId>
-    <Version>0.1.0</Version>
-    <Authors>OptiPowerTools Contributors</Authors>
-    <Company>OptiPowerTools</Company>
+    <Version>0.1.1</Version>
+    <Authors>Stanisław Szołkowski</Authors>
     <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, and easy configuration.</Description>
-    <PackageTags>Hangfire;Optimizely;OptimizelyModulePackage;BackgroundJobs;CMS;EPiServer</PackageTags>
+    <PackageTags>Optimizely;Hangfire;OptimizelyModulePackage;BackgroundJobs;CMS;EPiServer</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</PackageProjectUrl>
     <Copyright>Stanisław Szołkowski</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RepositoryUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
