@@ -2,7 +2,11 @@
   <!-- Override root Directory.Build.props for submodule projects.
        Submodules have their own build conventions that we should not override. -->
   <PropertyGroup>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>0</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors> 
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis> 
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 </Project>

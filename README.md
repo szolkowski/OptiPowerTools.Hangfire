@@ -6,7 +6,7 @@ A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background
 
 - Single extension method to register Hangfire with SQL Server storage and background server
 - Hangfire Dashboard with Optimizely role-based authorization out of the box
-- CMS menu integration — dashboard appears in the Optimizely navigation bar
+- CMS menu integration — dashboard appears in the Optimizely navigation bar with configurable placement
 - [Hangfire.Console](https://github.com/pieceofsummer/Hangfire.Console) support for rich job output
 - Configurable via options pattern or appsettings.json
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
@@ -60,6 +60,12 @@ services.AddOptiPowerToolHangfire(options =>
     options.EnableDashboard = true;
     options.EnableConsole = true;
     options.EnableCmsMenu = true;
+
+    // Menu placement — default is CmsSection (under the CMS nav section)
+    options.MenuPlacement = CmsMenuPlacement.CmsSection;
+    options.MenuPath = null;        // Override the auto-derived menu path
+    options.MenuSortIndex = null;   // Override the auto-derived sort index
+    options.CustomSectionName = "OptiPowerTools"; // Section name for CustomSection placement
 });
 ```
 
@@ -76,7 +82,11 @@ services.AddOptiPowerToolHangfire(options =>
       "SchemaName": "hangfire",
       "EnableDashboard": true,
       "EnableConsole": true,
-      "EnableCmsMenu": true
+      "EnableCmsMenu": true,
+      "MenuPlacement": "CmsSection",
+      "MenuPath": null,
+      "MenuSortIndex": null,
+      "CustomSectionName": "OptiPowerTools"
     }
   }
 }
@@ -94,6 +104,63 @@ services.AddOptiPowerToolHangfire(options =>
 | `EnableDashboard` | `bool` | `true` | Serve the Hangfire dashboard UI. Set to `false` for worker-only nodes. |
 | `EnableConsole` | `bool` | `true` | Enable Hangfire.Console for rich console output in jobs. |
 | `EnableCmsMenu` | `bool` | `true` | Add a Hangfire menu item to the Optimizely CMS navigation. |
+| `MenuPlacement` | `CmsMenuPlacement` | `CmsSection` | Where the menu item appears: `CmsSection`, `TopLevel`, or `CustomSection`. See [Menu Placement](#menu-placement). |
+| `MenuPath` | `string?` | `null` | Overrides the auto-derived menu path. Takes precedence over `MenuPlacement` path logic. |
+| `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
+| `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
+
+### Menu Placement
+
+By default, the Hangfire menu item appears under the CMS section in the Optimizely navigation bar. You can change this with `MenuPlacement`:
+
+#### `CmsSection` (default)
+
+Nests the menu item under the existing CMS section. This is the current behavior and requires no configuration changes.
+
+#### `TopLevel`
+
+Places the menu item directly in the global navigation bar as a top-level entry, alongside CMS, Commerce, etc.
+
+```json
+{
+  "OptiPowerTools": {
+    "Hangfire": {
+      "MenuPlacement": "TopLevel"
+    }
+  }
+}
+```
+
+#### `CustomSection`
+
+Creates a new collapsible section group and nests the Hangfire item underneath it. The section name is controlled by `CustomSectionName`.
+
+```json
+{
+  "OptiPowerTools": {
+    "Hangfire": {
+      "MenuPlacement": "CustomSection",
+      "CustomSectionName": "Background Jobs"
+    }
+  }
+}
+```
+
+#### Overriding path and sort index
+
+For any placement mode, you can override the menu path and sort index:
+
+```json
+{
+  "OptiPowerTools": {
+    "Hangfire": {
+      "MenuPlacement": "CmsSection",
+      "MenuPath": "/global/admin/hangfire",
+      "MenuSortIndex": 500
+    }
+  }
+}
+```
 
 ## Removing this package
 
@@ -123,7 +190,7 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
    git submodule update --init --recursive
    ```
 
-   If you don't have Foundation DB configured follow it readme and add connection strings to `/Users/sszolkowski/repos/OptiPowerTools.Hangfire/src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
+   If you don't have Foundation DB configured follow it readme and add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
 
 2. Build and run:
 

@@ -1,3 +1,4 @@
+using Hangfire.Dashboard;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -167,5 +168,97 @@ public class ServiceCollectionExtensionsTests
         var provider = services.BuildServiceProvider();
         var options = provider.GetRequiredService<IOptions<OptiPowerToolHangfireOptions>>().Value;
         Assert.Equal("action_schema", options.SchemaName);
+    }
+
+    [Fact]
+    public void AddOptiPowerToolHangfire_NonGeneric_DoesNotRegisterIDashboardAuthorizationFilter()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddLogging();
+
+        // Act
+        services.AddOptiPowerToolHangfire();
+
+        // Assert
+        var descriptor = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(IDashboardAuthorizationFilter));
+        Assert.Null(descriptor);
+    }
+
+    [Fact]
+    public void AddOptiPowerToolHangfire_Generic_RegistersCustomFilterAsIDashboardAuthorizationFilter()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddLogging();
+
+        // Act
+        services.AddOptiPowerToolHangfire<StubAuthorizationFilter>();
+
+        // Assert
+        var descriptor = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(IDashboardAuthorizationFilter));
+        Assert.NotNull(descriptor);
+        Assert.Equal(typeof(StubAuthorizationFilter), descriptor.ImplementationType);
+        Assert.Equal(ServiceLifetime.Singleton, descriptor.Lifetime);
+    }
+
+    [Fact]
+    public void AddOptiPowerToolHangfire_Generic_StillRegistersStandardFilter()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddLogging();
+
+        // Act
+        services.AddOptiPowerToolHangfire<StubAuthorizationFilter>();
+
+        // Assert
+        var descriptor = services.FirstOrDefault(d =>
+            d.ServiceType == typeof(OptimizelyDashboardAuthorizationFilter));
+        Assert.NotNull(descriptor);
+    }
+
+    [Fact]
+    public void AddOptiPowerToolHangfire_Generic_WithAction_ConfiguresOptions()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
+        services.AddLogging();
+        var expectedConnectionString = "Server=.;Database=Test;";
+
+        // Act
+        services.AddOptiPowerToolHangfire<StubAuthorizationFilter>(options =>
+        {
+            options.ConnectionString = expectedConnectionString;
+        });
+
+        // Assert
+        var provider = services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<OptiPowerToolHangfireOptions>>();
+        Assert.Equal(expectedConnectionString, options.Value.ConnectionString);
+    }
+
+    [Fact]
+    public void AddOptiPowerToolHangfire_Generic_ReturnsServiceCollection_ForChaining()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        // Act
+        var result = services.AddOptiPowerToolHangfire<StubAuthorizationFilter>();
+
+        // Assert
+        Assert.Same(services, result);
+    }
+
+    private class StubAuthorizationFilter : IDashboardAuthorizationFilter
+    {
+        public bool Authorize(DashboardContext context) => true;
     }
 }
