@@ -25,7 +25,12 @@ public class WaitForOtherJobsAttribute : JobFilterAttribute, IServerFilter
     /// <summary>
     /// Gets or sets the delay in seconds before the job is re-enqueued after a conflict.
     /// </summary>
-    public int RetryDelaySeconds { get; set; } = 15;
+    public int RetryDelaySeconds { get; init; } = 15;
+
+    /// <summary>
+    /// Gets or sets the maximum number of processing jobs to check for conflicts.
+    /// </summary>
+    public int MaxJobsToCheck { get; init; } = 1000;
 
     /// <summary>
     /// Initializes a new instance of <see cref="WaitForOtherJobsAttribute"/>.
@@ -46,7 +51,6 @@ public class WaitForOtherJobsAttribute : JobFilterAttribute, IServerFilter
             return;
 
         var monitoringApi = context.Storage.GetMonitoringApi();
-        var processingJobs = monitoringApi.ProcessingJobs(0, int.MaxValue);
 
         var targetTypeNames = new HashSet<string>(
             _jobTypes
@@ -55,14 +59,24 @@ public class WaitForOtherJobsAttribute : JobFilterAttribute, IServerFilter
 
         var currentJobId = context.BackgroundJob.Id;
 
-        var hasConflict = processingJobs.Any(j =>
-            j.Key != currentJobId
-            && j.Value?.Job?.Type is not null
-            && targetTypeNames.Contains(j.Value.Job.Type.FullName!));
-
-        if (hasConflict)
+        const int pageSize = 50;
+        for (var offset = 0; offset < MaxJobsToCheck; offset += pageSize)
         {
-            RescheduleJob(context);
+            var count = Math.Min(pageSize, MaxJobsToCheck - offset);
+            var page = monitoringApi.ProcessingJobs(offset, count);
+            if (page.Count == 0)
+                break;
+
+            var hasConflict = page.Any(j =>
+                j.Key != currentJobId
+                && j.Value?.Job?.Type is not null
+                && targetTypeNames.Contains(j.Value.Job.Type.FullName!));
+
+            if (hasConflict)
+            {
+                RescheduleJob(context);
+                return;
+            }
         }
     }
 

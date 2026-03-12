@@ -30,7 +30,7 @@ public class HangfireCmsController : Controller
     [Route("[action]")]
     public IActionResult Index()
     {
-        if (!_options.AuthorizedRoles.Any(role => User.IsInRole(role)))
+        if (_options.AuthorizedRoles is not { } roles || !roles.Any(role => User.IsInRole(role)))
             return Forbid();
 
         ViewBag.DashboardPath = _options.DashboardPath;

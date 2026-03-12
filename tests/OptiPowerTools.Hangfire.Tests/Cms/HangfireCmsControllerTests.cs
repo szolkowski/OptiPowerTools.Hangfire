@@ -54,7 +54,7 @@ public class HangfireCmsControllerTests
         var result = controller.Index();
 
         // Assert
-        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.IsType<ViewResult>(result);
         Assert.Equal(options.DashboardPath, controller.ViewBag.DashboardPath);
         Assert.Equal(options.DashboardTitle, controller.ViewBag.DashboardTitle);
     }
@@ -144,5 +144,41 @@ public class HangfireCmsControllerTests
 
         // Assert
         Assert.IsType<ViewResult>(result);
+    }
+
+    [Fact]
+    public void Index_EmptyAuthorizedRoles_ReturnsForbid()
+    {
+        // Arrange
+        var options = new OptiPowerToolHangfireOptions
+        {
+            AuthorizedRoles = []
+        };
+        var user = CreatePrincipal(true, "Administrators");
+        var controller = CreateController(options, user);
+
+        // Act
+        var result = controller.Index();
+
+        // Assert
+        Assert.IsType<ForbidResult>(result);
+    }
+
+    [Fact]
+    public void Index_NullAuthorizedRoles_ReturnsForbid()
+    {
+        // Arrange
+        var options = new OptiPowerToolHangfireOptions
+        {
+            AuthorizedRoles = null!
+        };
+        var user = CreatePrincipal(true, "Administrators");
+        var controller = CreateController(options, user);
+
+        // Act
+        var result = controller.Index();
+
+        // Assert
+        Assert.IsType<ForbidResult>(result);
     }
 }

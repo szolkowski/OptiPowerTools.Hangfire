@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using OptiPowerTools.Hangfire.Authorization;
 using OptiPowerTools.Hangfire.Cms;
 using OptiPowerTools.Hangfire.Configuration;
+using OptiPowerTools.Hangfire.Tools.Extensions;
 
 namespace OptiPowerTools.Hangfire.Extensions;
 
@@ -91,13 +92,19 @@ public static class ServiceCollectionExtensions
         {
             var options = serviceProvider.GetRequiredService<IOptions<OptiPowerToolHangfireOptions>>().Value;
 
+            if (string.IsNullOrWhiteSpace(options.ConnectionString))
+                throw new InvalidOperationException(
+                    "A connection string must be configured for Hangfire SQL Server storage. " +
+                    "Set 'OptiPowerTools:Hangfire:ConnectionString' in configuration or pass it via the setup action.");
+
             config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseSqlServerStorage(options.ConnectionString, new SqlServerStorageOptions
                 {
-                    SchemaName = options.SchemaName
+                    SchemaName = options.SchemaName,
+                    JobExpirationCheckInterval = options.JobExpirationCheckInterval
                 });
 
             if (options.EnableConsole)
@@ -108,5 +115,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<OptimizelyDashboardAuthorizationFilter>();
         services.AddSingleton<HangfireMenuProvider>();
+
+        services.AddOptiPowerToolHangfireTools();
     }
 }

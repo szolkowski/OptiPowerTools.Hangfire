@@ -21,7 +21,7 @@ public class RetainOnSuccessAttribute : JobFilterAttribute, IApplyStateFilter
     /// <summary>
     /// Gets or sets the retention period in days after a job succeeds.
     /// </summary>
-    public int RetentionDays { get; set; }
+    public int RetentionDays { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="RetainOnSuccessAttribute"/>.

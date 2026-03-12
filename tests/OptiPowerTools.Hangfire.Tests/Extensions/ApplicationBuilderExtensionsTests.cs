@@ -1,10 +1,11 @@
 using Hangfire.Dashboard;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using OptiPowerTools.Hangfire.Authorization;
 using OptiPowerTools.Hangfire.Configuration;
-using OptiPowerTools.Hangfire.Extensions;
+using HangfireAppBuilderExtensions = OptiPowerTools.Hangfire.Extensions.ApplicationBuilderExtensions;
 
 namespace OptiPowerTools.Hangfire.Tests.Extensions;
 
@@ -24,7 +25,7 @@ public class ApplicationBuilderExtensionsTests
         services.AddSingleton(new OptimizelyDashboardAuthorizationFilter(optionsWrapper));
 
         if (customFilter is not null)
-            services.AddSingleton<IDashboardAuthorizationFilter>(customFilter);
+            services.AddSingleton(customFilter);
 
         return services.BuildServiceProvider();
     }
@@ -38,7 +39,7 @@ public class ApplicationBuilderExtensionsTests
         var serviceProvider = CreateServiceProvider(options, customFilter);
 
         // Act
-        var result = ApplicationBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
+        var result = HangfireAppBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
 
         // Assert
         var filters = result.ToList();
@@ -55,7 +56,7 @@ public class ApplicationBuilderExtensionsTests
         var serviceProvider = CreateServiceProvider(options, customFilter);
 
         // Act
-        var result = ApplicationBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
+        var result = HangfireAppBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
 
         // Assert
         var filters = result.ToList();
@@ -71,7 +72,7 @@ public class ApplicationBuilderExtensionsTests
         var serviceProvider = CreateServiceProvider(options);
 
         // Act
-        var result = ApplicationBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
+        var result = HangfireAppBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
 
         // Assert
         var filters = result.ToList();
@@ -87,9 +88,38 @@ public class ApplicationBuilderExtensionsTests
         var serviceProvider = CreateServiceProvider(options);
 
         // Act
-        var result = ApplicationBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
+        var result = HangfireAppBuilderExtensions.ResolveAuthorizationFilters(serviceProvider, options);
 
         // Assert
         Assert.Empty(result);
+    }
+
+    [Fact]
+    public void UseOptiPowerToolHangfire_EnableDashboardFalse_ReturnsAppBuilder()
+    {
+        // Arrange
+        var options = new OptiPowerToolHangfireOptions { EnableDashboard = false };
+        var serviceProvider = CreateServiceProvider(options);
+        var app = Substitute.For<IApplicationBuilder>();
+        app.ApplicationServices.Returns(serviceProvider);
+
+        // Act
+        var result = HangfireAppBuilderExtensions.UseOptiPowerToolHangfire(app);
+
+        // Assert
+        Assert.Same(app, result);
+    }
+
+    [Fact]
+    public void UseOptiPowerToolHangfire_MissingOptions_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var serviceProvider = services.BuildServiceProvider();
+        var app = Substitute.For<IApplicationBuilder>();
+        app.ApplicationServices.Returns(serviceProvider);
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => HangfireAppBuilderExtensions.UseOptiPowerToolHangfire(app));
     }
 }

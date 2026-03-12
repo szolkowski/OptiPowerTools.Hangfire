@@ -34,9 +34,8 @@ public class OptimizelyDashboardAuthorizationFilter : IDashboardAuthorizationFil
     /// </summary>
     /// <param name="user">The claims principal to check.</param>
     /// <returns>True if the user is authenticated and in at least one authorized role.</returns>
-    internal bool IsAuthorized(ClaimsPrincipal user)
-    {
-        return user.Identity?.IsAuthenticated == true
-            && _options.AuthorizedRoles.Any(role => user.IsInRole(role));
-    }
+    internal bool IsAuthorized(ClaimsPrincipal user) =>
+        user.Identity?.IsAuthenticated == true
+        && _options.AuthorizedRoles is { } roles
+        && roles.Any(user.IsInRole);
 }

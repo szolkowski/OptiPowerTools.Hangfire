@@ -25,11 +25,9 @@ public class WaitForOtherJobsAttributeTests
         public void Execute() { }
     }
 
-    private class TestableWaitForOtherJobs : WaitForOtherJobsAttribute
+    private class TestableWaitForOtherJobs(params Type[] jobTypes) : WaitForOtherJobsAttribute(jobTypes)
     {
         public bool RescheduleJobCalled { get; private set; }
-
-        public TestableWaitForOtherJobs(params Type[] jobTypes) : base(jobTypes) { }
 
         protected override void RescheduleJob(PerformingContext context)
         {
@@ -247,5 +245,21 @@ public class WaitForOtherJobsAttributeTests
         var exception = Record.Exception(() => filter.OnPerformed(context));
 
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void MaxJobsToCheck_DefaultIs1000()
+    {
+        var filter = new WaitForOtherJobsAttribute(typeof(StubJobA));
+
+        Assert.Equal(1000, filter.MaxJobsToCheck);
+    }
+
+    [Fact]
+    public void MaxJobsToCheck_CanBeSet()
+    {
+        var filter = new WaitForOtherJobsAttribute(typeof(StubJobA)) { MaxJobsToCheck = 500 };
+
+        Assert.Equal(500, filter.MaxJobsToCheck);
     }
 }

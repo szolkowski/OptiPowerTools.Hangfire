@@ -69,6 +69,10 @@ services.AddOptiPowerToolHangfire(options =>
     options.MenuPath = null;        // Override the auto-derived menu path
     options.MenuSortIndex = null;   // Override the auto-derived sort index
     options.CustomSectionName = "OptiPowerTools"; // Section name for CustomSection placement
+    options.CustomMenuItemName = "OptiPowerTools"; // Display name for the menu item
+
+    // Storage maintenance
+    options.JobExpirationCheckInterval = TimeSpan.FromMinutes(15);
 });
 ```
 
@@ -90,7 +94,9 @@ services.AddOptiPowerToolHangfire(options =>
       "MenuPlacement": "CmsSection",
       "MenuPath": null,
       "MenuSortIndex": null,
-      "CustomSectionName": "OptiPowerTools"
+      "CustomSectionName": "OptiPowerTools",
+      "CustomMenuItemName": "OptiPowerTools",
+      "JobExpirationCheckInterval": "00:15:00"
     }
   }
 }
@@ -113,6 +119,8 @@ services.AddOptiPowerToolHangfire(options =>
 | `MenuPath` | `string?` | `null` | Overrides the auto-derived menu path. Takes precedence over `MenuPlacement` path logic. |
 | `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
 | `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
+| `CustomMenuItemName` | `string` | `"OptiPowerTools"` | Display name for the Hangfire menu item in the CMS navigation. Falls back to `DashboardTitle` when empty. |
+| `JobExpirationCheckInterval` | `TimeSpan` | `00:15:00` | How often the expiration manager checks for and removes expired jobs. |
 
 ### Dashboard Authorization
 

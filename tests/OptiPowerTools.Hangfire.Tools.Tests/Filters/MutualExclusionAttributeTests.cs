@@ -10,7 +10,7 @@ namespace OptiPowerTools.Hangfire.Tools.Tests.Filters;
 
 public class MutualExclusionAttributeTests
 {
-    private const string TestResource = "test-resource";
+    private const string _testResource = "test-resource";
 
     private static PerformingContext CreatePerformingContext(
         IStorageConnection? connection = null,
@@ -47,11 +47,9 @@ public class MutualExclusionAttributeTests
             null);
     }
 
-    private class TestableMutualExclusion : MutualExclusionAttribute
+    private class TestableMutualExclusion(string resourceName) : MutualExclusionAttribute(resourceName)
     {
         public bool RescheduleJobCalled { get; private set; }
-
-        public TestableMutualExclusion(string resourceName) : base(resourceName) { }
 
         protected override void RescheduleJob(PerformingContext context)
         {
@@ -63,7 +61,7 @@ public class MutualExclusionAttributeTests
     [Fact]
     public void Constructor_WithResourceName_SetsDefaults()
     {
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         Assert.Equal(15, filter.RetryDelaySeconds);
     }
@@ -77,7 +75,7 @@ public class MutualExclusionAttributeTests
     [Fact]
     public void RetryDelaySeconds_CanBeSet()
     {
-        var filter = new MutualExclusionAttribute(TestResource) { RetryDelaySeconds = 30 };
+        var filter = new MutualExclusionAttribute(_testResource) { RetryDelaySeconds = 30 };
 
         Assert.Equal(30, filter.RetryDelaySeconds);
     }
@@ -91,7 +89,7 @@ public class MutualExclusionAttributeTests
             .Returns(mockLock);
 
         var context = CreatePerformingContext(connection: connection);
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         filter.OnPerforming(context);
 
@@ -127,7 +125,7 @@ public class MutualExclusionAttributeTests
             .Returns(mockLock);
 
         var context = CreatePerformingContext(connection: connection);
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         filter.OnPerforming(context);
 
@@ -141,10 +139,10 @@ public class MutualExclusionAttributeTests
     {
         var connection = Substitute.For<IStorageConnection>();
         connection.AcquireDistributedLock(Arg.Any<string>(), Arg.Any<TimeSpan>())
-            .Throws(new DistributedLockTimeoutException(TestResource));
+            .Throws(new DistributedLockTimeoutException(_testResource));
 
         var context = CreatePerformingContext(connection: connection);
-        var filter = new TestableMutualExclusion(TestResource);
+        var filter = new TestableMutualExclusion(_testResource);
 
         filter.OnPerforming(context);
 
@@ -157,10 +155,10 @@ public class MutualExclusionAttributeTests
     {
         var connection = Substitute.For<IStorageConnection>();
         connection.AcquireDistributedLock(Arg.Any<string>(), Arg.Any<TimeSpan>())
-            .Throws(new DistributedLockTimeoutException(TestResource));
+            .Throws(new DistributedLockTimeoutException(_testResource));
 
         var context = CreatePerformingContext(connection: connection);
-        var filter = new TestableMutualExclusion(TestResource);
+        var filter = new TestableMutualExclusion(_testResource);
 
         filter.OnPerforming(context);
 
@@ -174,7 +172,7 @@ public class MutualExclusionAttributeTests
         var context = CreatePerformedContext();
         context.Items["MutualExclusion:Lock"] = mockLock;
 
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         filter.OnPerformed(context);
 
@@ -186,7 +184,7 @@ public class MutualExclusionAttributeTests
     public void OnPerformed_WithoutLock_DoesNotThrow()
     {
         var context = CreatePerformedContext();
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         var exception = Record.Exception(() => filter.OnPerformed(context));
 
@@ -199,10 +197,60 @@ public class MutualExclusionAttributeTests
         var context = CreatePerformedContext();
         context.Items["MutualExclusion:Lock"] = "not-a-disposable";
 
-        var filter = new MutualExclusionAttribute(TestResource);
+        var filter = new MutualExclusionAttribute(_testResource);
 
         var exception = Record.Exception(() => filter.OnPerformed(context));
 
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void LockTimeoutSeconds_DefaultIsZero()
+    {
+        var filter = new MutualExclusionAttribute(_testResource);
+
+        Assert.Equal(0, filter.LockTimeoutSeconds);
+    }
+
+    [Fact]
+    public void LockTimeoutSeconds_CanBeSet()
+    {
+        var filter = new MutualExclusionAttribute(_testResource) { LockTimeoutSeconds = 5 };
+
+        Assert.Equal(5, filter.LockTimeoutSeconds);
+    }
+
+    [Fact]
+    public void OnPerforming_UsesConfiguredLockTimeout()
+    {
+        var connection = Substitute.For<IStorageConnection>();
+        var mockLock = Substitute.For<IDisposable>();
+        connection.AcquireDistributedLock(Arg.Any<string>(), Arg.Any<TimeSpan>())
+            .Returns(mockLock);
+
+        var context = CreatePerformingContext(connection: connection);
+        var filter = new MutualExclusionAttribute(_testResource) { LockTimeoutSeconds = 10 };
+
+        filter.OnPerforming(context);
+
+        connection.Received(1).AcquireDistributedLock(
+            Arg.Any<string>(),
+            TimeSpan.FromSeconds(10));
+    }
+
+    [Fact]
+    public void OnPerformed_WhenDisposeThrows_DoesNotThrow()
+    {
+        var mockLock = Substitute.For<IDisposable>();
+        mockLock.When(x => x.Dispose()).Do(_ => throw new InvalidOperationException("Connection lost"));
+        var context = CreatePerformedContext();
+        context.Items["MutualExclusion:Lock"] = mockLock;
+
+        var filter = new MutualExclusionAttribute(_testResource);
+
+        var exception = Record.Exception(() => filter.OnPerformed(context));
+
+        Assert.Null(exception);
+        Assert.False(context.Items.ContainsKey("MutualExclusion:Lock"));
     }
 }
