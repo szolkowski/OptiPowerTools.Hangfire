@@ -1,4 +1,7 @@
+using Hangfire;
 using OptiPowerTools.Hangfire.Extensions;
+using OptiPowerTools.Hangfire.Tools.Extensions;
+using OptiPowerTools.Hangfire.Web.Jobs;
 
 namespace OptiPowerTools.Hangfire.Web;
 
@@ -16,6 +19,7 @@ public class Startup
         _foundationStartup.ConfigureServices(services);
 
         services.AddOptiPowerToolHangfire();
+        services.AddOptiPowerToolHangfireTools();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -23,5 +27,11 @@ public class Startup
         _foundationStartup.Configure(app, env);
 
         app.UseOptiPowerToolHangfire();
+
+        RecurringJob.AddOrUpdate<DataImportJob>("data-import", j => j.Execute(null!), Cron.Minutely);
+        RecurringJob.AddOrUpdate<DataExportJob>("data-export", j => j.Execute(null!), Cron.Minutely);
+        RecurringJob.AddOrUpdate<ReportGeneratorJob>("report-gen", j => j.Execute(null!), Cron.Minutely);
+        RecurringJob.AddOrUpdate<NotificationJob>("notification", j => j.Execute(null!), Cron.Minutely);
+        RecurringJob.AddOrUpdate<MonthlyAuditJob>("monthly-audit", j => j.Execute(null!), Cron.Monthly);
     }
 }
