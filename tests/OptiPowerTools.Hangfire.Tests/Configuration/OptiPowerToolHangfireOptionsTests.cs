@@ -27,6 +27,7 @@ public class OptiPowerToolHangfireOptionsTests
         Assert.True(options.EnableDashboard);
         Assert.True(options.EnableConsole);
         Assert.True(options.EnableCmsMenu);
+        Assert.True(options.EnableStandardAuthorization);
     }
 
     [Theory]
@@ -54,6 +55,15 @@ public class OptiPowerToolHangfireOptionsTests
     {
         var options = new OptiPowerToolHangfireOptions { EnableCmsMenu = value };
         Assert.Equal(value, options.EnableCmsMenu);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Options_CanSetEnableStandardAuthorization(bool value)
+    {
+        var options = new OptiPowerToolHangfireOptions { EnableStandardAuthorization = value };
+        Assert.Equal(value, options.EnableStandardAuthorization);
     }
 
     [Fact]
@@ -109,5 +119,64 @@ public class OptiPowerToolHangfireOptionsTests
         // Assert
         Assert.Single(options.AuthorizedRoles);
         Assert.Equal("SuperAdmin", options.AuthorizedRoles[0]);
+    }
+
+    [Fact]
+    public void DefaultOptions_MenuPlacement_IsCmsSection()
+    {
+        var options = new OptiPowerToolHangfireOptions();
+        Assert.Equal(CmsMenuPlacement.CmsSection, options.MenuPlacement);
+    }
+
+    [Fact]
+    public void DefaultOptions_MenuPath_IsNull()
+    {
+        var options = new OptiPowerToolHangfireOptions();
+        Assert.Null(options.MenuPath);
+    }
+
+    [Fact]
+    public void DefaultOptions_MenuSortIndex_IsNull()
+    {
+        var options = new OptiPowerToolHangfireOptions();
+        Assert.Null(options.MenuSortIndex);
+    }
+
+    [Fact]
+    public void DefaultOptions_CustomSectionName_IsOptiPowerTools()
+    {
+        var options = new OptiPowerToolHangfireOptions();
+        Assert.Equal("OptiPowerTools", options.CustomSectionName);
+    }
+
+    [Theory]
+    [InlineData(CmsMenuPlacement.CmsSection)]
+    [InlineData(CmsMenuPlacement.TopLevel)]
+    [InlineData(CmsMenuPlacement.CustomSection)]
+    public void Options_CanSetMenuPlacement(CmsMenuPlacement value)
+    {
+        var options = new OptiPowerToolHangfireOptions { MenuPlacement = value };
+        Assert.Equal(value, options.MenuPlacement);
+    }
+
+    [Fact]
+    public void Options_CanSetMenuPath()
+    {
+        var options = new OptiPowerToolHangfireOptions { MenuPath = "/global/custom/path" };
+        Assert.Equal("/global/custom/path", options.MenuPath);
+    }
+
+    [Fact]
+    public void Options_CanSetMenuSortIndex()
+    {
+        var options = new OptiPowerToolHangfireOptions { MenuSortIndex = 42 };
+        Assert.Equal(42, options.MenuSortIndex);
+    }
+
+    [Fact]
+    public void Options_CanSetCustomSectionName()
+    {
+        var options = new OptiPowerToolHangfireOptions { CustomSectionName = "My Section" };
+        Assert.Equal("My Section", options.CustomSectionName);
     }
 }

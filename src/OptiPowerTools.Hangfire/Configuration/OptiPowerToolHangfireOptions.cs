@@ -49,8 +49,42 @@ public class OptiPowerToolHangfireOptions
     public bool EnableConsole { get; set; } = true;
 
     /// <summary>
+    /// Whether to use the built-in Optimizely role-based authorization filter for the dashboard.
+    /// When false and no custom filter is provided via <c>AddOptiPowerToolHangfire&lt;TFilter&gt;</c>,
+    /// the dashboard allows unrestricted access.
+    /// Defaults to true.
+    /// </summary>
+    public bool EnableStandardAuthorization { get; set; } = true;
+
+    /// <summary>
     /// Whether to add a menu item in the Optimizely CMS navigation for the Hangfire dashboard.
     /// Defaults to true.
     /// </summary>
     public bool EnableCmsMenu { get; set; } = true;
+
+    /// <summary>
+    /// Controls where the Hangfire menu item is placed in the CMS navigation.
+    /// Defaults to <see cref="CmsMenuPlacement.CmsSection"/>, which nests it under the CMS section.
+    /// </summary>
+    public CmsMenuPlacement MenuPlacement { get; set; } = CmsMenuPlacement.CmsSection;
+
+    /// <summary>
+    /// Overrides the full menu path for the Hangfire menu item.
+    /// When null (the default), the path is derived automatically from <see cref="MenuPlacement"/>.
+    /// When set, this value takes precedence over the derived path regardless of placement mode.
+    /// </summary>
+    public string? MenuPath { get; set; }
+
+    /// <summary>
+    /// Overrides the sort index for the Hangfire menu item.
+    /// When null (the default), a sensible default is chosen based on <see cref="MenuPlacement"/>.
+    /// </summary>
+    public int? MenuSortIndex { get; set; }
+
+    /// <summary>
+    /// The display name for the custom section when <see cref="MenuPlacement"/> is
+    /// <see cref="CmsMenuPlacement.CustomSection"/>.
+    /// Defaults to "OptiPowerTools". Ignored for other placement modes.
+    /// </summary>
+    public string CustomSectionName { get; set; } = "OptiPowerTools";
 }

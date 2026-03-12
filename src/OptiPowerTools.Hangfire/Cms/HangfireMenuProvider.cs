@@ -29,16 +29,75 @@ public class HangfireMenuProvider : IMenuProvider
         if (!_options.EnableCmsMenu)
             return Enumerable.Empty<MenuItem>();
 
-        var hangfireMenuItem = new UrlMenuItem(
-            _options.DashboardTitle,
-            MenuPaths.Global + "/cms/hangfire",
-            "/HangfireCms/Index")
+        return _options.MenuPlacement switch
         {
-            IsAvailable = _ => _options.AuthorizedRoles.Any(role =>
-                EPiServer.Security.PrincipalInfo.CurrentPrincipal.IsInRole(role)),
-            SortIndex = SortIndex.Last - 10
+            CmsMenuPlacement.TopLevel => BuildTopLevel(),
+            CmsMenuPlacement.CustomSection => BuildCustomSection(),
+            _ => BuildCmsSection()
+        };
+    }
+
+    private List<MenuItem> BuildCmsSection()
+    {
+        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/cms/hangfire" : _options.MenuPath;
+        var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+
+        var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
+        {
+            IsAvailable = _ => IsCurrentUserAuthorized(),
+            SortIndex = sortIndex
         };
 
-        return [hangfireMenuItem];
+        return [item];
+    }
+
+    private List<MenuItem> BuildTopLevel()
+    {
+        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/hangfire" : _options.MenuPath;
+        var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+
+        var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
+        {
+            IsAvailable = _ => IsCurrentUserAuthorized(),
+            SortIndex = sortIndex
+        };
+
+        return [item];
+    }
+
+    private List<MenuItem> BuildCustomSection()
+    {
+        var sectionName = _options.CustomSectionName;
+        var sectionSlug = ToSlug(sectionName);
+        var sectionPath = string.IsNullOrEmpty(_options.MenuPath) ?  MenuPaths.Global + "/" + sectionSlug : _options.MenuPath;
+        var itemPath = sectionPath + "/hangfire";
+        var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+
+        var section = new SectionMenuItem(sectionName, sectionPath)
+        {
+            IsAvailable = _ => IsCurrentUserAuthorized(),
+            SortIndex = sectionSortIndex
+        };
+
+        var item = new UrlMenuItem(_options.DashboardTitle, itemPath, "/HangfireCms/Index")
+        {
+            IsAvailable = _ => IsCurrentUserAuthorized(),
+            SortIndex = 100
+        };
+
+        return [section, item];
+    }
+
+    private bool IsCurrentUserAuthorized()
+    {
+        return _options.AuthorizedRoles.Any(role =>
+            EPiServer.Security.PrincipalInfo.CurrentPrincipal.IsInRole(role));
+    }
+
+    private static string ToSlug(string name)
+    {
+        return name.ToLowerInvariant()
+            .Replace(" ", "-")
+            .Replace("_", "-");
     }
 }

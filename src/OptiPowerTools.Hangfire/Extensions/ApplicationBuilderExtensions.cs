@@ -1,4 +1,5 @@
 using Hangfire;
+using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -25,13 +26,10 @@ public static class ApplicationBuilderExtensions
 
         if (options.EnableDashboard)
         {
-            var authFilter = app.ApplicationServices
-                .GetRequiredService<OptimizelyDashboardAuthorizationFilter>();
-
             var dashboardOptions = new DashboardOptions
             {
                 DashboardTitle = options.DashboardTitle,
-                Authorization = [authFilter],
+                Authorization = ResolveAuthorizationFilters(app.ApplicationServices, options),
                 AppPath = null
             };
 
@@ -39,5 +37,24 @@ public static class ApplicationBuilderExtensions
         }
 
         return app;
+    }
+
+    internal static IEnumerable<IDashboardAuthorizationFilter> ResolveAuthorizationFilters(
+        IServiceProvider serviceProvider,
+        OptiPowerToolHangfireOptions options)
+    {
+        var customFilter = serviceProvider.GetService<IDashboardAuthorizationFilter>();
+
+        if (customFilter is not null)
+            return [customFilter];
+
+        if (options.EnableStandardAuthorization)
+        {
+            var standardFilter = serviceProvider
+                .GetRequiredService<OptimizelyDashboardAuthorizationFilter>();
+            return [standardFilter];
+        }
+
+        return [];
     }
 }
