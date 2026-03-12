@@ -11,7 +11,8 @@ A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background
 - Configurable via options pattern or appsettings.json
 - Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
-- Targets net8.0
+- Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`)
+- Targets net6.0, net8.0, net10.0
 
 ## Quick Start
 
@@ -210,6 +211,117 @@ For any placement mode, you can override the menu path and sort index:
 }
 ```
 
+## Job Filters
+
+The package includes CMS-agnostic Hangfire job filters for concurrency control, available via the `OptiPowerTools.Hangfire.Tools.Filters` namespace.
+
+### MutualExclusion
+
+Prevents concurrent execution of jobs sharing the same resource group. Uses Hangfire distributed locks for reliable, race-condition-free mutual exclusion.
+
+```csharp
+using OptiPowerTools.Hangfire.Tools.Filters;
+
+[MutualExclusion("data-pipeline")]
+public class DataImportJob
+{
+    public void Execute() { /* ... */ }
+}
+
+[MutualExclusion("data-pipeline")]
+public class DataExportJob
+{
+    public void Execute() { /* ... */ }
+}
+```
+
+When `DataImportJob` is running, `DataExportJob` is automatically rescheduled (and vice versa). The worker thread is freed immediately — no blocking. The delay before retry is configurable:
+
+```csharp
+[MutualExclusion("data-pipeline", RetryDelaySeconds = 30)]
+```
+
+### WaitForOtherJobs
+
+Prevents a job from executing while specific other job types are processing. This is one-directional — only the decorated job needs the attribute.
+
+```csharp
+using OptiPowerTools.Hangfire.Tools.Filters;
+
+[WaitForOtherJobs(typeof(DataImportJob))]
+public class ReportGeneratorJob
+{
+    public void Execute() { /* ... */ }
+}
+```
+
+`ReportGeneratorJob` will be rescheduled if `DataImportJob` is currently processing. `DataImportJob` does not need any attribute and runs normally.
+
+```csharp
+// Wait for multiple job types, with custom retry delay
+[WaitForOtherJobs(typeof(DataImportJob), typeof(DataExportJob), RetryDelaySeconds = 30)]
+```
+
+> **Note:** `WaitForOtherJobs` uses the Hangfire monitoring API and has a small race-condition window. For guaranteed mutual exclusion, use `MutualExclusion` instead.
+
+### ExpireOnSuccess
+
+Reduces the retention period for succeeded jobs. By default, Hangfire keeps succeeded jobs for 24 hours. This filter overrides the expiration timeout so short-lived fire-and-forget jobs are cleaned up faster.
+
+```csharp
+using OptiPowerTools.Hangfire.Tools.Filters;
+
+// Job data expires 60 seconds after success (instead of 24 hours)
+[ExpireOnSuccess(60)]
+public class NotificationJob
+{
+    public void Execute() { /* ... */ }
+}
+
+// Job data expires immediately after success
+[ExpireOnSuccess]
+public class HealthCheckJob
+{
+    public void Execute() { /* ... */ }
+}
+```
+
+The `expirationSeconds` parameter defaults to `0` (minimal retention). Only succeeded jobs are affected — failed or deleted jobs keep their default Hangfire expiration.
+
+### RetainOnSuccess
+
+Extends the retention period for succeeded jobs beyond Hangfire's default of 24 hours. Use this for infrequent jobs (weekly reports, monthly audits) where you want execution details to remain visible in the dashboard until the next run.
+
+```csharp
+using OptiPowerTools.Hangfire.Tools.Filters;
+
+// Keep succeeded job data for 180 days
+[RetainOnSuccess(180)]
+public class MonthlyAuditJob
+{
+    public void Execute() { /* ... */ }
+}
+
+// Keep succeeded job data for 90 days (default)
+[RetainOnSuccess]
+public class WeeklyReportJob
+{
+    public void Execute() { /* ... */ }
+}
+```
+
+The `retentionDays` parameter defaults to `90`. Only succeeded jobs are affected — failed or deleted jobs keep their default Hangfire expiration. For the inverse (reducing retention), see `ExpireOnSuccess`.
+
+### Combining with DisableConcurrentExecution
+
+Neither filter prevents the same job type from running concurrently with itself. Combine with Hangfire's built-in attribute if needed:
+
+```csharp
+[DisableConcurrentExecution(timeoutInSeconds: 60)]
+[MutualExclusion("data-pipeline")]
+public class DataImportJob { /* ... */ }
+```
+
 ## Removing this package
 
 This package is a thin configuration wrapper — it does not modify Hangfire internals or change the way Hangfire stores data. If your project outgrows it and you need full control, simply remove the package and configure Hangfire manually. Your existing database, jobs, and history will continue to work without any migration or data changes.
@@ -220,7 +332,7 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
 
 ### Prerequisites
 
-- .NET 8.0 SDK
+- .NET 6.0, 8.0, or 10.0 SDK
 - Docker (for SQL Server)
 - Git with submodule support
 
@@ -263,15 +375,17 @@ The site starts at `https://localhost:5001` or `http://localhost:5000`. Once run
 dotnet test
 ```
 
-Tests run against `net8.0`.
+Tests run against `net6.0`, `net8.0`, and `net10.0`.
 
 ### Project structure
 
 | Project | Purpose |
 |---------|---------|
-| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net8.0`) |
+| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net10.0`) |
+| `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
 | `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net8.0`, references Foundation submodule) |
-| `tests/OptiPowerTools.Hangfire.Tests` | Unit tests — xUnit + NSubstitute (`net8.0`) |
+| `tests/OptiPowerTools.Hangfire.Tests` | Unit tests for main library — xUnit + NSubstitute |
+| `tests/OptiPowerTools.Hangfire.Tools.Tests` | Unit tests for Tools library — xUnit + NSubstitute |
 | `sub/foundation` | Git submodule — [episerver/Foundation](https://github.com/episerver/Foundation) |
 
 ### Troubleshooting

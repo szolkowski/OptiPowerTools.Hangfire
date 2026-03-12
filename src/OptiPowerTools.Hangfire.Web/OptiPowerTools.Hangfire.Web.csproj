@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\sub\foundation\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\OptiPowerTools.Hangfire\OptiPowerTools.Hangfire.csproj" />
+    <ProjectReference Include="..\OptiPowerTools.Hangfire.Tools\OptiPowerTools.Hangfire.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>

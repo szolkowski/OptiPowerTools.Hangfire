@@ -24,11 +24,17 @@ jobs:
       - name: Restore
         run: dotnet restore src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj
 
+      - name: Restore Tools Tests
+        run: dotnet restore tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj
+
       - name: Build
         run: dotnet build src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-restore -c Release
 
       - name: Test
         run: dotnet test tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj -c Release
+
+      - name: Test Tools
+        run: dotnet test tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj -c Release
 
       - name: Pack
         run: dotnet pack src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-build -c Release

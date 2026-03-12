@@ -18,6 +18,7 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RepositoryUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeToolsAssembly</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,8 +42,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OptiPowerTools.Hangfire.Tools\OptiPowerTools.Hangfire.Tools.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
+
+  <Target Name="IncludeToolsAssembly">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)OptiPowerTools.Hangfire.Tools.dll" />
+    </ItemGroup>
+  </Target>
 
 </Project>
