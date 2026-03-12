@@ -39,7 +39,7 @@ public class HangfireMenuProvider : IMenuProvider
 
     private List<MenuItem> BuildCmsSection()
     {
-        var path = _options.MenuPath ?? MenuPaths.Global + "/cms/hangfire";
+        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/cms/hangfire" : _options.MenuPath;
         var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
 
         var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
@@ -53,7 +53,7 @@ public class HangfireMenuProvider : IMenuProvider
 
     private List<MenuItem> BuildTopLevel()
     {
-        var path = _options.MenuPath ?? MenuPaths.Global + "/hangfire";
+        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/hangfire" : _options.MenuPath;
         var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
 
         var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
@@ -69,7 +69,7 @@ public class HangfireMenuProvider : IMenuProvider
     {
         var sectionName = _options.CustomSectionName;
         var sectionSlug = ToSlug(sectionName);
-        var sectionPath = _options.MenuPath ?? MenuPaths.Global + "/" + sectionSlug;
+        var sectionPath = string.IsNullOrEmpty(_options.MenuPath) ?  MenuPaths.Global + "/" + sectionSlug : _options.MenuPath;
         var itemPath = sectionPath + "/hangfire";
         var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
 

@@ -9,6 +9,7 @@ A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background
 - CMS menu integration — dashboard appears in the Optimizely navigation bar with configurable placement
 - [Hangfire.Console](https://github.com/pieceofsummer/Hangfire.Console) support for rich job output
 - Configurable via options pattern or appsettings.json
+- Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
 - Targets net8.0
 
@@ -60,6 +61,7 @@ services.AddOptiPowerToolHangfire(options =>
     options.EnableDashboard = true;
     options.EnableConsole = true;
     options.EnableCmsMenu = true;
+    options.EnableStandardAuthorization = true;
 
     // Menu placement — default is CmsSection (under the CMS nav section)
     options.MenuPlacement = CmsMenuPlacement.CmsSection;
@@ -83,6 +85,7 @@ services.AddOptiPowerToolHangfire(options =>
       "EnableDashboard": true,
       "EnableConsole": true,
       "EnableCmsMenu": true,
+      "EnableStandardAuthorization": true,
       "MenuPlacement": "CmsSection",
       "MenuPath": null,
       "MenuSortIndex": null,
@@ -104,10 +107,55 @@ services.AddOptiPowerToolHangfire(options =>
 | `EnableDashboard` | `bool` | `true` | Serve the Hangfire dashboard UI. Set to `false` for worker-only nodes. |
 | `EnableConsole` | `bool` | `true` | Enable Hangfire.Console for rich console output in jobs. |
 | `EnableCmsMenu` | `bool` | `true` | Add a Hangfire menu item to the Optimizely CMS navigation. |
+| `EnableStandardAuthorization` | `bool` | `true` | Use the built-in Optimizely role-based authorization filter for the dashboard. When `false` and no custom filter is provided, the dashboard allows unrestricted access. |
 | `MenuPlacement` | `CmsMenuPlacement` | `CmsSection` | Where the menu item appears: `CmsSection`, `TopLevel`, or `CustomSection`. See [Menu Placement](#menu-placement). |
 | `MenuPath` | `string?` | `null` | Overrides the auto-derived menu path. Takes precedence over `MenuPlacement` path logic. |
 | `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
 | `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
+
+### Dashboard Authorization
+
+By default, the Hangfire dashboard is protected by the built-in Optimizely role-based authorization filter, which restricts access to users in the `AuthorizedRoles` (Administrators, CmsAdmins, WebAdmins). You can customize this behavior in three ways:
+
+#### Standard authorization (default)
+
+No changes needed. The dashboard uses `OptimizelyDashboardAuthorizationFilter` which checks the user's CMS roles.
+
+#### Custom authorization filter
+
+Provide your own `IDashboardAuthorizationFilter` implementation using the generic overload. The custom filter takes full precedence over the standard filter, regardless of the `EnableStandardAuthorization` setting.
+
+```csharp
+services.AddOptiPowerToolHangfire<MyCustomAuthFilter>(options =>
+{
+    options.ConnectionString = Configuration.GetConnectionString("HangfireConnection");
+});
+```
+
+```csharp
+public class MyCustomAuthFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        var httpContext = context.GetHttpContext();
+        return httpContext.User.Identity?.IsAuthenticated == true;
+    }
+}
+```
+
+#### Free access (no authorization)
+
+Disable the standard authorization filter without providing a custom one. This allows unrestricted access to the dashboard — useful for development environments.
+
+```csharp
+services.AddOptiPowerToolHangfire(options =>
+{
+    options.ConnectionString = Configuration.GetConnectionString("HangfireConnection");
+    options.EnableStandardAuthorization = false;
+});
+```
+
+> **Warning:** Do not disable authorization in production. The Hangfire dashboard exposes job data, retry controls, and server information.
 
 ### Menu Placement
 
