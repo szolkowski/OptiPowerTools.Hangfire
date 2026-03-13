@@ -101,7 +101,13 @@ public class HangfireMenuProvider : IMenuProvider
         return [section, item];
     }
 
-    private bool IsCurrentUserAuthorized() => _options.AuthorizedRoles.Any(role => EPiServer.Security.PrincipalInfo.CurrentPrincipal.IsInRole(role));
+    private bool IsCurrentUserAuthorized()
+    {
+        var principal = EPiServer.Security.PrincipalInfo.CurrentPrincipal;
+        return principal?.Identity?.IsAuthenticated == true
+            && _options.AuthorizedRoles is { } roles
+            && roles.Any(principal.IsInRole);
+    }
 
     private static string NormalizePath(string path) =>
         path.StartsWith('/') ? path : "/" + path;

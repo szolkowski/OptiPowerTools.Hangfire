@@ -70,7 +70,8 @@ public class WaitForOtherJobsAttribute : JobFilterAttribute, IServerFilter
             var hasConflict = page.Any(j =>
                 j.Key != currentJobId
                 && j.Value?.Job?.Type is not null
-                && targetTypeNames.Contains(j.Value.Job.Type.FullName!));
+                && j.Value.Job.Type.FullName is { } fullName
+                && targetTypeNames.Contains(fullName));
 
             if (hasConflict)
             {

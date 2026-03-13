@@ -82,9 +82,10 @@ public class OptiPowerToolHangfireOptions
     public int? MenuSortIndex { get; set; }
 
     /// <summary>
-    /// The display name for the custom section when <see cref="MenuPlacement"/> is
-    /// <see cref="CmsMenuPlacement.CustomSection"/>.
-    /// Defaults to "OptiPowerTools". Ignored for other placement modes.
+    /// The display name for the section when <see cref="MenuPlacement"/> is
+    /// <see cref="CmsMenuPlacement.TopLevel"/> or <see cref="CmsMenuPlacement.CustomSection"/>.
+    /// Defaults to "OptiPowerTools". Ignored when <see cref="MenuPlacement"/> is
+    /// <see cref="CmsMenuPlacement.CmsSection"/> (no section is created).
     /// </summary>
     public string CustomSectionName { get; set; } = "OptiPowerTools";
     

@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <!-- NU1605: Package downgrade warnings from Foundation (net6.0) referenced in net8.0 host -->
     <NoWarn>$(NoWarn);NU1605</NoWarn>
+    <Configurations>Debug;Release;Debug-CmsSection;Debug-TopLevel;Debug-CustomSection</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
