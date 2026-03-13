@@ -406,4 +406,8 @@ Tests run against `net6.0`, `net8.0`, and `net10.0`.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE) for details.
+MIT. See [LICENSE](LICENSE.txt) for details.
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
