@@ -14,7 +14,7 @@ This package was inspired by community feedback on the blog post [Adding Hangfir
 - Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
 - Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`, `RetainOnSuccess`)
-- Targets net6.0, net8.0, net10.0
+- Targets net6.0, net8.0, net9.0, net10.0
 
 ![Hangfire Dashboard in Optimizely CMS](images/OptiToolsHangfireDashboard.png)
 
@@ -387,7 +387,7 @@ The site starts at `https://localhost:5001` or `http://localhost:5000`. Once run
 dotnet test
 ```
 
-Tests run against `net6.0`, `net8.0`, and `net10.0`.
+Tests run against `net6.0`, `net8.0`, `net9.0`, and `net10.0`.
 
 ### Project structure
 

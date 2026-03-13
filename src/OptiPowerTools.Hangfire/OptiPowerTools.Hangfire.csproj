@@ -11,7 +11,7 @@
     <Title>OptiPowerTools: Hangfire</Title>
     <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, CMS menu integration, Hangfire.Console support, built-in job filters for concurrency control and lifecycle management, and easy configuration via options pattern or appsettings.json.</Description>
     <PackageTags>Optimizely;Hangfire;CMS;BackgroundJobs;BackgroundProcessing;JobFilters;Optimizely CMS;EPiServer</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
