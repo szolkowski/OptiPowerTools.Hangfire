@@ -1,19 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
 
     <!-- NuGet Package Metadata -->
     <PackageId>OptiPowerTools.Hangfire</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.5</Version>
     <Authors>Stanisław Szołkowski</Authors>
-    <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, and easy configuration.</Description>
-    <PackageTags>Optimizely;Hangfire;OptimizelyModulePackage;BackgroundJobs;CMS;EPiServer</PackageTags>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Copyright>Stanisław Szołkowski 2026</Copyright>
+    <Title>OptiPowerTools: Hangfire</Title>
+    <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, CMS menu integration, Hangfire.Console support, built-in job filters for concurrency control and lifecycle management, and easy configuration via options pattern or appsettings.json.</Description>
+    <PackageTags>Optimizely;Hangfire;CMS;BackgroundJobs;BackgroundProcessing;JobFilters;Optimizely CMS;EPiServer</PackageTags>
+
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</PackageProjectUrl>
-    <Copyright>Stanisław Szołkowski</Copyright>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RepositoryUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</RepositoryUrl>
@@ -47,7 +50,9 @@
 
   <ItemGroup>
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\images\OptiToolsHangfireDashboard.png" Pack="true" PackagePath="\" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
   <Target Name="IncludeToolsAssembly">
