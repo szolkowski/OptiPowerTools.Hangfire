@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Adds OptiPowerTools Hangfire Tools services to the specified <see cref="IServiceCollection"/>.
+    /// Currently, a no-op placeholder for forward compatibility when future versions register services.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
     /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>

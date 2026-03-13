@@ -92,7 +92,7 @@ public class HangfireMenuProviderTests
     {
         var options = new OptiPowerToolHangfireOptions
         {
-            MenuPath = MenuPaths.Global + "/admin/hangfire"
+            MenuPath = "/admin/hangfire"
         };
         var provider = CreateProvider(options);
 
@@ -118,7 +118,7 @@ public class HangfireMenuProviderTests
     // === TopLevel ===
 
     [Fact]
-    public void GetMenuItems_TopLevel_ReturnsSingleMenuItem()
+    public void GetMenuItems_TopLevel_ReturnsTwoMenuItems()
     {
         var options = new OptiPowerToolHangfireOptions
         {
@@ -128,11 +128,11 @@ public class HangfireMenuProviderTests
 
         var items = provider.GetMenuItems().ToList();
 
-        Assert.Single(items);
+        Assert.Equal(2, items.Count);
     }
 
     [Fact]
-    public void GetMenuItems_TopLevel_ReturnsUrlMenuItem()
+    public void GetMenuItems_TopLevel_FirstItemIsSectionMenuItem()
     {
         var options = new OptiPowerToolHangfireOptions
         {
@@ -140,14 +140,28 @@ public class HangfireMenuProviderTests
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        var urlItem = Assert.IsType<UrlMenuItem>(item);
+        Assert.IsType<SectionMenuItem>(items[0]);
+    }
+
+    [Fact]
+    public void GetMenuItems_TopLevel_SecondItemIsUrlMenuItem()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.TopLevel
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        var urlItem = Assert.IsType<UrlMenuItem>(items[1]);
         Assert.Equal("/HangfireCms/Index", urlItem.Url);
     }
 
     [Fact]
-    public void GetMenuItems_TopLevel_UsesGlobalHangfirePath()
+    public void GetMenuItems_TopLevel_SectionPathDerivedFromCustomSectionName()
     {
         var options = new OptiPowerToolHangfireOptions
         {
@@ -155,9 +169,10 @@ public class HangfireMenuProviderTests
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        Assert.Equal(MenuPaths.Global + "/hangfire", item.Path);
+        Assert.Equal(MenuPaths.Global + "/optipowertools", items[0].Path);
+        Assert.Equal(MenuPaths.Global + "/optipowertools/hangfire", items[1].Path);
     }
 
     [Fact]
@@ -170,9 +185,9 @@ public class HangfireMenuProviderTests
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        Assert.Equal("Custom Title", item.Text);
+        Assert.Equal("Custom Title", items[1].Text);
     }
 
     [Fact]
@@ -184,9 +199,10 @@ public class HangfireMenuProviderTests
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        Assert.Equal(SortIndex.Last - 10, item.SortIndex);
+        Assert.Equal(SortIndex.Last - 10, items[0].SortIndex);
+        Assert.Equal(SortIndex.Last - 10, items[1].SortIndex);
     }
 
     [Fact]
@@ -195,13 +211,14 @@ public class HangfireMenuProviderTests
         var options = new OptiPowerToolHangfireOptions
         {
             MenuPlacement = CmsMenuPlacement.TopLevel,
-            MenuPath = MenuPaths.Global + "/tools/hangfire"
+            MenuPath = "/tools"
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        Assert.Equal(MenuPaths.Global + "/tools/hangfire", item.Path);
+        Assert.Equal(MenuPaths.Global + "/tools", items[0].Path);
+        Assert.Equal(MenuPaths.Global + "/tools/hangfire", items[1].Path);
     }
 
     [Fact]
@@ -214,9 +231,10 @@ public class HangfireMenuProviderTests
         };
         var provider = CreateProvider(options);
 
-        var item = provider.GetMenuItems().Single();
+        var items = provider.GetMenuItems().ToList();
 
-        Assert.Equal(200, item.SortIndex);
+        Assert.Equal(200, items[0].SortIndex);
+        Assert.Equal(200, items[1].SortIndex);
     }
 
     // === CustomSection ===
@@ -358,7 +376,7 @@ public class HangfireMenuProviderTests
         var options = new OptiPowerToolHangfireOptions
         {
             MenuPlacement = CmsMenuPlacement.CustomSection,
-            MenuPath = MenuPaths.Global + "/custom"
+            MenuPath = "/custom"
         };
         var provider = CreateProvider(options);
 
@@ -397,6 +415,153 @@ public class HangfireMenuProviderTests
         var items = provider.GetMenuItems().ToList();
 
         Assert.Equal("Jobs", items[1].Text);
+    }
+
+    // === CustomSection slug edge cases ===
+
+    [Theory]
+    [InlineData("My Tools & Utils", "my-tools-utils")]
+    [InlineData("Tools (Beta)", "tools-beta")]
+    [InlineData("  Spaced  ", "spaced")]
+    [InlineData("Dots.And_Underscores", "dots-and-underscores")]
+    public void GetMenuItems_CustomSection_SpecialCharactersInName_ProducesValidSlug(
+        string sectionName, string expectedSlug)
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.CustomSection,
+            CustomSectionName = sectionName
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal(MenuPaths.Global + "/" + expectedSlug, items[0].Path);
+    }
+
+    // === CustomMenuItemName ===
+
+    [Fact]
+    public void GetMenuItems_CmsSection_WithCustomMenuItemName_UsesCustomName()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            CustomMenuItemName = "Background Jobs"
+        };
+        var provider = CreateProvider(options);
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.Equal("Background Jobs", item.Text);
+    }
+
+    [Fact]
+    public void GetMenuItems_CmsSection_EmptyCustomMenuItemName_FallsBackToDashboardTitle()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            CustomMenuItemName = "",
+            DashboardTitle = "My Dashboard"
+        };
+        var provider = CreateProvider(options);
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.Equal("My Dashboard", item.Text);
+    }
+
+    [Fact]
+    public void GetMenuItems_CustomSection_WithCustomMenuItemName_UsesCustomNameForItem()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.CustomSection,
+            CustomMenuItemName = "Jobs"
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal("Jobs", items[1].Text);
+    }
+
+    // === MenuPath normalization ===
+
+    [Fact]
+    public void GetMenuItems_CmsSection_MenuPathWithoutLeadingSlash_NormalizesPath()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPath = "admin/hangfire"
+        };
+        var provider = CreateProvider(options);
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.Equal(MenuPaths.Global + "/admin/hangfire", item.Path);
+    }
+
+    [Fact]
+    public void GetMenuItems_TopLevel_MenuPathWithoutLeadingSlash_NormalizesPath()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.TopLevel,
+            MenuPath = "tools"
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal(MenuPaths.Global + "/tools", items[0].Path);
+        Assert.Equal(MenuPaths.Global + "/tools/hangfire", items[1].Path);
+    }
+
+    // === TopLevel CustomSectionName ===
+
+    [Fact]
+    public void GetMenuItems_TopLevel_WithCustomSectionName_UsesSectionNameText()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.TopLevel,
+            CustomSectionName = "My Tools"
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal("My Tools", items[0].Text);
+    }
+
+    [Fact]
+    public void GetMenuItems_TopLevel_WithCustomSectionName_DerivesSectionSlug()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.TopLevel,
+            CustomSectionName = "My Tools"
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal(MenuPaths.Global + "/my-tools", items[0].Path);
+        Assert.Equal(MenuPaths.Global + "/my-tools/hangfire", items[1].Path);
+    }
+
+    [Fact]
+    public void GetMenuItems_TopLevel_DefaultSectionNameText_IsOptiPowerTools()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = CmsMenuPlacement.TopLevel
+        };
+        var provider = CreateProvider(options);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.Equal("OptiPowerTools", items[0].Text);
     }
 
     // === Disabled with non-default placement ===

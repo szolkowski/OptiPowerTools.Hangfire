@@ -21,7 +21,7 @@ public class ExpireOnSuccessAttribute : JobFilterAttribute, IApplyStateFilter
     /// <summary>
     /// Gets or sets the expiration timeout in seconds after a job succeeds.
     /// </summary>
-    public int ExpirationSeconds { get; set; }
+    public int ExpirationSeconds { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="ExpireOnSuccessAttribute"/>.

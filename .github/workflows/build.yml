@@ -30,11 +30,14 @@ jobs:
       - name: Build
         run: dotnet build src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-restore -c Release
 
+      - name: Build Tools
+        run: dotnet build src/OptiPowerTools.Hangfire.Tools/OptiPowerTools.Hangfire.Tools.csproj --no-restore -c Release
+
       - name: Test
-        run: dotnet test tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj -c Release
+        run: dotnet test tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj -c Release --collect:"XPlat Code Coverage"
 
       - name: Test Tools
-        run: dotnet test tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj -c Release
+        run: dotnet test tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj -c Release --collect:"XPlat Code Coverage"
 
       - name: Pack
         run: dotnet pack src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-build -c Release

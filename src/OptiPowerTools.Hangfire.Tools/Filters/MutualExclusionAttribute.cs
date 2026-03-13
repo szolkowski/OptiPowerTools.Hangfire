@@ -20,13 +20,19 @@ namespace OptiPowerTools.Hangfire.Tools.Filters;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class MutualExclusionAttribute : JobFilterAttribute, IServerFilter
 {
-    private const string LockItemKey = "MutualExclusion:Lock";
+    private const string _lockItemKey = "MutualExclusion:Lock";
     private readonly string _resourceName;
 
     /// <summary>
     /// Gets or sets the delay in seconds before the job is re-enqueued after a conflict.
     /// </summary>
-    public int RetryDelaySeconds { get; set; } = 15;
+    public int RetryDelaySeconds { get; init; } = 15;
+
+    /// <summary>
+    /// Gets or sets the maximum time in seconds to wait for the lock before rescheduling.
+    /// Defaults to 0 (fail immediately).
+    /// </summary>
+    public int LockTimeoutSeconds { get; init; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="MutualExclusionAttribute"/>.
@@ -46,9 +52,9 @@ public class MutualExclusionAttribute : JobFilterAttribute, IServerFilter
         {
             var distributedLock = context.Connection.AcquireDistributedLock(
                 $"hangfire:mutual-exclusion:{_resourceName}",
-                TimeSpan.Zero);
+                TimeSpan.FromSeconds(LockTimeoutSeconds));
 
-            context.Items[LockItemKey] = distributedLock;
+            context.Items[_lockItemKey] = distributedLock;
         }
         catch (DistributedLockTimeoutException)
         {
@@ -59,11 +65,21 @@ public class MutualExclusionAttribute : JobFilterAttribute, IServerFilter
     /// <inheritdoc />
     public void OnPerformed(PerformedContext context)
     {
-        if (context.Items.TryGetValue(LockItemKey, out var lockObj)
+        if (context.Items.TryGetValue(_lockItemKey, out var lockObj)
             && lockObj is IDisposable distributedLock)
         {
-            distributedLock.Dispose();
-            context.Items.Remove(LockItemKey);
+            try
+            {
+                distributedLock.Dispose();
+            }
+            catch (Exception)
+            {
+                // Lock release failed; it will expire via Hangfire's timeout mechanism.
+            }
+            finally
+            {
+                context.Items.Remove(_lockItemKey);
+            }
         }
     }
 

@@ -39,24 +39,36 @@ public class HangfireMenuProvider : IMenuProvider
 
     private List<MenuItem> BuildCmsSection()
     {
-        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/cms/hangfire" : _options.MenuPath;
-        var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
-
-        var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
-        {
-            IsAvailable = _ => IsCurrentUserAuthorized(),
-            SortIndex = sortIndex
-        };
-
-        return [item];
+        var defaultPathSuffix = string.IsNullOrEmpty(_options.MenuPath) ? "/cms/hangfire" : NormalizePath(_options.MenuPath);
+        return BuildUrlMenuItem(defaultPathSuffix);
     }
 
     private List<MenuItem> BuildTopLevel()
     {
-        var path = string.IsNullOrEmpty(_options.MenuPath) ? MenuPaths.Global + "/hangfire" : _options.MenuPath;
-        var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+        var sectionName = string.IsNullOrEmpty(_options.CustomSectionName) ? _options.DashboardTitle : _options.CustomSectionName;
+        var sectionSlug = ToSlug(sectionName);
+        var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+        var sectionPath = string.IsNullOrEmpty(_options.MenuPath) ? "/" + sectionSlug : NormalizePath(_options.MenuPath);
+        var itemPath = sectionPath + "/hangfire";
 
-        var item = new UrlMenuItem(_options.DashboardTitle, path, "/HangfireCms/Index")
+        var section = new SectionMenuItem(sectionName, MenuPaths.Global + sectionPath)
+        {
+            IsAvailable = _ => IsCurrentUserAuthorized(),
+            SortIndex = sectionSortIndex
+        };
+
+        var item = BuildUrlMenuItem(itemPath).First();
+
+        return [section, item];
+    }
+
+    private List<MenuItem> BuildUrlMenuItem(string defaultPathSuffix)
+    {
+        var path = MenuPaths.Global + defaultPathSuffix;
+        var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
+        var menuItemName = string.IsNullOrEmpty(_options.CustomMenuItemName) ? _options.DashboardTitle : _options.CustomMenuItemName;
+
+        var item = new UrlMenuItem(menuItemName, path, "/HangfireCms/Index")
         {
             IsAvailable = _ => IsCurrentUserAuthorized(),
             SortIndex = sortIndex
@@ -67,10 +79,11 @@ public class HangfireMenuProvider : IMenuProvider
 
     private List<MenuItem> BuildCustomSection()
     {
-        var sectionName = _options.CustomSectionName;
+        var sectionName = string.IsNullOrEmpty(_options.CustomSectionName) ? _options.DashboardTitle : _options.CustomSectionName;
         var sectionSlug = ToSlug(sectionName);
-        var sectionPath = string.IsNullOrEmpty(_options.MenuPath) ?  MenuPaths.Global + "/" + sectionSlug : _options.MenuPath;
+        var sectionPath = MenuPaths.Global + (string.IsNullOrEmpty(_options.MenuPath) ? "/" + sectionSlug : NormalizePath(_options.MenuPath));
         var itemPath = sectionPath + "/hangfire";
+        var menuItemName = string.IsNullOrEmpty(_options.CustomMenuItemName) ? _options.DashboardTitle : _options.CustomMenuItemName;
         var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
 
         var section = new SectionMenuItem(sectionName, sectionPath)
@@ -79,7 +92,7 @@ public class HangfireMenuProvider : IMenuProvider
             SortIndex = sectionSortIndex
         };
 
-        var item = new UrlMenuItem(_options.DashboardTitle, itemPath, "/HangfireCms/Index")
+        var item = new UrlMenuItem(menuItemName, itemPath, "/HangfireCms/Index")
         {
             IsAvailable = _ => IsCurrentUserAuthorized(),
             SortIndex = 100
@@ -90,14 +103,23 @@ public class HangfireMenuProvider : IMenuProvider
 
     private bool IsCurrentUserAuthorized()
     {
-        return _options.AuthorizedRoles.Any(role =>
-            EPiServer.Security.PrincipalInfo.CurrentPrincipal.IsInRole(role));
+        var principal = EPiServer.Security.PrincipalInfo.CurrentPrincipal;
+        return principal?.Identity?.IsAuthenticated == true
+            && _options.AuthorizedRoles is { } roles
+            && roles.Any(principal.IsInRole);
     }
+
+    private static string NormalizePath(string path) =>
+        path.StartsWith('/') ? path : "/" + path;
 
     private static string ToSlug(string name)
     {
-        return name.ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("_", "-");
+        var slug = name.ToLowerInvariant()
+            .Replace(' ', '-')
+            .Replace('_', '-')
+            .Replace('.', '-');
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "");
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-{2,}", "-");
+        return slug.Trim('-');
     }
 }

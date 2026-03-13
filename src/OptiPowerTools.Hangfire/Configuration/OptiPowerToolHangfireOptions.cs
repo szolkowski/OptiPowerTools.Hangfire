@@ -82,9 +82,22 @@ public class OptiPowerToolHangfireOptions
     public int? MenuSortIndex { get; set; }
 
     /// <summary>
-    /// The display name for the custom section when <see cref="MenuPlacement"/> is
-    /// <see cref="CmsMenuPlacement.CustomSection"/>.
-    /// Defaults to "OptiPowerTools". Ignored for other placement modes.
+    /// The display name for the section when <see cref="MenuPlacement"/> is
+    /// <see cref="CmsMenuPlacement.TopLevel"/> or <see cref="CmsMenuPlacement.CustomSection"/>.
+    /// Defaults to "OptiPowerTools". Ignored when <see cref="MenuPlacement"/> is
+    /// <see cref="CmsMenuPlacement.CmsSection"/> (no section is created).
     /// </summary>
     public string CustomSectionName { get; set; } = "OptiPowerTools";
+    
+    /// <summary>
+    /// The display name for the Hangfire menu item in the CMS navigation.
+    /// When empty or null, falls back to <see cref="DashboardTitle"/>.
+    /// </summary>
+    public string CustomMenuItemName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The interval at which the expiration manager checks for and removes expired jobs.
+    /// Defaults to 15 minutes.
+    /// </summary>
+    public TimeSpan JobExpirationCheckInterval { get; set; } = TimeSpan.FromMinutes(15);
 }

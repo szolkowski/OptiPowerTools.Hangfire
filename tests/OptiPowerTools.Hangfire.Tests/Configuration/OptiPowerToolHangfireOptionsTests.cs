@@ -97,10 +97,11 @@ public class OptiPowerToolHangfireOptionsTests
     public void Options_CanSetDashboardPath()
     {
         // Arrange
-        var options = new OptiPowerToolHangfireOptions();
-
-        // Act
-        options.DashboardPath = "/custom-hangfire";
+        var options = new OptiPowerToolHangfireOptions
+        {
+            // Act
+            DashboardPath = "/custom-hangfire"
+        };
 
         // Assert
         Assert.Equal("/custom-hangfire", options.DashboardPath);
@@ -178,5 +179,22 @@ public class OptiPowerToolHangfireOptionsTests
     {
         var options = new OptiPowerToolHangfireOptions { CustomSectionName = "My Section" };
         Assert.Equal("My Section", options.CustomSectionName);
+    }
+
+    [Fact]
+    public void DefaultOptions_JobExpirationCheckInterval_Is15Minutes()
+    {
+        var options = new OptiPowerToolHangfireOptions();
+        Assert.Equal(TimeSpan.FromMinutes(15), options.JobExpirationCheckInterval);
+    }
+
+    [Fact]
+    public void Options_CanSetJobExpirationCheckInterval()
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            JobExpirationCheckInterval = TimeSpan.FromMinutes(30)
+        };
+        Assert.Equal(TimeSpan.FromMinutes(30), options.JobExpirationCheckInterval);
     }
 }

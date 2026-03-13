@@ -2,6 +2,8 @@
 
 A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 12](https://www.optimizely.com/).
 
+This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
+
 ## Features
 
 - Single extension method to register Hangfire with SQL Server storage and background server
@@ -11,8 +13,10 @@ A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background
 - Configurable via options pattern or appsettings.json
 - Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
-- Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`)
+- Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`, `RetainOnSuccess`)
 - Targets net6.0, net8.0, net10.0
+
+![Hangfire Dashboard in Optimizely CMS](images/OptiToolsHangfireDashboard.png)
 
 ## Quick Start
 
@@ -69,6 +73,10 @@ services.AddOptiPowerToolHangfire(options =>
     options.MenuPath = null;        // Override the auto-derived menu path
     options.MenuSortIndex = null;   // Override the auto-derived sort index
     options.CustomSectionName = "OptiPowerTools"; // Section name for CustomSection placement
+    options.CustomMenuItemName = "OptiPowerTools"; // Display name for the menu item
+
+    // Storage maintenance
+    options.JobExpirationCheckInterval = TimeSpan.FromMinutes(15);
 });
 ```
 
@@ -90,7 +98,9 @@ services.AddOptiPowerToolHangfire(options =>
       "MenuPlacement": "CmsSection",
       "MenuPath": null,
       "MenuSortIndex": null,
-      "CustomSectionName": "OptiPowerTools"
+      "CustomSectionName": "OptiPowerTools",
+      "CustomMenuItemName": "OptiPowerTools",
+      "JobExpirationCheckInterval": "00:15:00"
     }
   }
 }
@@ -113,6 +123,8 @@ services.AddOptiPowerToolHangfire(options =>
 | `MenuPath` | `string?` | `null` | Overrides the auto-derived menu path. Takes precedence over `MenuPlacement` path logic. |
 | `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
 | `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
+| `CustomMenuItemName` | `string` | `"OptiPowerTools"` | Display name for the Hangfire menu item in the CMS navigation. Falls back to `DashboardTitle` when empty. |
+| `JobExpirationCheckInterval` | `TimeSpan` | `00:15:00` | How often the expiration manager checks for and removes expired jobs. |
 
 ### Dashboard Authorization
 
@@ -341,7 +353,7 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
 1. Clone the repository with submodules:
 
    ```bash
-   git clone --recursive https://github.com/<owner>/OptiPowerTools.Hangfire.git
+   git clone --recursive https://github.com/szolkowski/OptiPowerTools.Hangfire.git
    ```
 
    If you already cloned without `--recursive`, initialize the submodule:
@@ -350,7 +362,7 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
    git submodule update --init --recursive
    ```
 
-   If you don't have Foundation DB configured follow it readme and add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
+   If you don't have Foundation DB configured, follow its README and add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
 
 2. Build and run:
 
