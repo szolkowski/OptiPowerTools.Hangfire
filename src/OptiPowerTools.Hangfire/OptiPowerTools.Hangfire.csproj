@@ -5,7 +5,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>OptiPowerTools.Hangfire</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, and easy configuration.</Description>
     <PackageTags>Optimizely;Hangfire;OptimizelyModulePackage;BackgroundJobs;CMS;EPiServer</PackageTags>
