@@ -7,17 +7,22 @@ namespace OptiPowerTools.Hangfire.Web;
 public class Startup
 {
     private readonly Foundation.Startup _foundationStartup;
+    private readonly IConfiguration _configuration;
 
     public Startup(IWebHostEnvironment webHostingEnvironment, IConfiguration configuration)
     {
         _foundationStartup = new Foundation.Startup(webHostingEnvironment, configuration);
+        _configuration = configuration;
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
         _foundationStartup.ConfigureServices(services);
 
-        services.AddOptiPowerToolHangfire();
+        services.AddOptiPowerToolHangfire(options =>
+        {
+            options.ConnectionString = _configuration.GetConnectionString("EPiServerDB") ?? throw new InvalidOperationException("Hangfire connection string is not configured.");
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

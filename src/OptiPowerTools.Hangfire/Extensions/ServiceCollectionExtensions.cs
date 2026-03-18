@@ -9,6 +9,7 @@ using OptiPowerTools.Hangfire.Authorization;
 using OptiPowerTools.Hangfire.Cms;
 using OptiPowerTools.Hangfire.Configuration;
 using OptiPowerTools.Hangfire.Tools.Extensions;
+using System.Reflection;
 
 namespace OptiPowerTools.Hangfire.Extensions;
 
@@ -81,6 +82,10 @@ public static class ServiceCollectionExtensions
         IServiceCollection services,
         Action<OptiPowerToolHangfireOptions> setupAction)
     {
+        var assembly = typeof(HangfireCmsController).Assembly;
+        services.AddControllersWithViews()
+            .AddApplicationPart(assembly);
+
         services.AddOptions<OptiPowerToolHangfireOptions>()
             .Configure<IConfiguration>((options, configuration) =>
             {
