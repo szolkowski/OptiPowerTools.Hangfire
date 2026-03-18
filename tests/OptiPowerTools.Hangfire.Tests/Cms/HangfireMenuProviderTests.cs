@@ -37,7 +37,7 @@ public class HangfireMenuProviderTests
         var item = provider.GetMenuItems().Single();
 
         var urlItem = Assert.IsType<UrlMenuItem>(item);
-        Assert.Equal("/HangfireCms/Index", urlItem.Url);
+        Assert.Equal("/optipowertools/hangfire", urlItem.Url);
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public class HangfireMenuProviderTests
         var items = provider.GetMenuItems().ToList();
 
         var urlItem = Assert.IsType<UrlMenuItem>(items[1]);
-        Assert.Equal("/HangfireCms/Index", urlItem.Url);
+        Assert.Equal("/optipowertools/hangfire", urlItem.Url);
     }
 
     [Fact]
@@ -279,7 +279,7 @@ public class HangfireMenuProviderTests
         var items = provider.GetMenuItems().ToList();
 
         var urlItem = Assert.IsType<UrlMenuItem>(items[1]);
-        Assert.Equal("/HangfireCms/Index", urlItem.Url);
+        Assert.Equal("/optipowertools/hangfire", urlItem.Url);
     }
 
     [Fact]

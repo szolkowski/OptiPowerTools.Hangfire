@@ -68,7 +68,7 @@ public class HangfireMenuProvider : IMenuProvider
         var sortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
         var menuItemName = string.IsNullOrEmpty(_options.CustomMenuItemName) ? _options.DashboardTitle : _options.CustomMenuItemName;
 
-        var item = new UrlMenuItem(menuItemName, path, "/HangfireCms/Index")
+        var item = new UrlMenuItem(menuItemName, path, _options.CmsShellPath)
         {
             IsAvailable = _ => IsCurrentUserAuthorized(),
             SortIndex = sortIndex
@@ -92,7 +92,7 @@ public class HangfireMenuProvider : IMenuProvider
             SortIndex = sectionSortIndex
         };
 
-        var item = new UrlMenuItem(menuItemName, itemPath, "/HangfireCms/Index")
+        var item = new UrlMenuItem(menuItemName, itemPath, _options.CmsShellPath)
         {
             IsAvailable = _ => IsCurrentUserAuthorized(),
             SortIndex = 100
