@@ -5,7 +5,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>OptiPowerTools.Hangfire</PackageId>
-    <Version>0.4.2</Version>
+    <Version>0.4.3</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Copyright>Stanisław Szołkowski 2026</Copyright>
     <Title>OptiPowerTools: Hangfire</Title>
