@@ -98,9 +98,9 @@ public class OptiPowerToolHangfireOptions
     /// <summary>
     /// The URL path where the CMS shell page (iframe wrapper) is served.
     /// This is the page that the CMS menu item links to; it embeds the Hangfire dashboard in an iframe.
-    /// Defaults to "/optipowertools/hangfire".
+    /// Defaults to "/HangfireCms/Index".
     /// </summary>
-    public string CmsShellPath { get; set; } = "/optipowertools/hangfire";
+    public string CmsShellPath { get; set; } = "/HangfireCms/Index";
 
     /// <summary>
     /// The interval at which the expiration manager checks for and removes expired jobs.
