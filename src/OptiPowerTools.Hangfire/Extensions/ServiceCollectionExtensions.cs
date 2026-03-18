@@ -3,6 +3,7 @@ using Hangfire.Console;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OptiPowerTools.Hangfire.Authorization;
@@ -81,6 +82,22 @@ public static class ServiceCollectionExtensions
         IServiceCollection services,
         Action<OptiPowerToolHangfireOptions> setupAction)
     {
+        services.AddMvcCore()
+            .ConfigureApplicationPartManager(manager =>
+            {
+                var assembly = typeof(HangfireCmsController).Assembly;
+                var assemblyName = assembly.GetName().Name;
+
+                if (!manager.ApplicationParts.Any(p => p.Name == assemblyName))
+                {
+                    var factory = ApplicationPartFactory.GetApplicationPartFactory(assembly);
+                    foreach (var part in factory.GetApplicationParts(assembly))
+                    {
+                        manager.ApplicationParts.Add(part);
+                    }
+                }
+            });
+
         services.AddOptions<OptiPowerToolHangfireOptions>()
             .Configure<IConfiguration>((options, configuration) =>
             {

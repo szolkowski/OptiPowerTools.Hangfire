@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OptiPowerTools.Hangfire.Authorization;
-using OptiPowerTools.Hangfire.Cms;
 using OptiPowerTools.Hangfire.Configuration;
 
 namespace OptiPowerTools.Hangfire.Extensions;
@@ -35,11 +34,6 @@ public static class ApplicationBuilderExtensions
             };
 
             app.UseHangfireDashboard(options.DashboardPath, dashboardOptions);
-        }
-
-        if (options.EnableCmsMenu)
-        {
-            app.UseMiddleware<HangfireCmsMiddleware>();
         }
 
         return app;
