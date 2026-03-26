@@ -10,7 +10,6 @@ namespace OptiPowerTools.Hangfire.Cms;
 /// The view embeds the Hangfire dashboard in an iframe with the CMS navigation chrome.
 /// </summary>
 [Authorize]
-[Route("[controller]")]
 public class HangfireCmsController : Controller
 {
     private readonly OptiPowerToolHangfireOptions _options;
@@ -27,7 +26,7 @@ public class HangfireCmsController : Controller
     /// <summary>
     /// Renders the Hangfire dashboard embedded in the CMS shell.
     /// </summary>
-    [Route("[action]")]
+    [HttpGet]
     public IActionResult Index()
     {
         if (User.Identity?.IsAuthenticated != true
