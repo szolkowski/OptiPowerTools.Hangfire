@@ -74,6 +74,7 @@ services.AddOptiPowerToolHangfire(options =>
     options.MenuSortIndex = null;   // Override the auto-derived sort index
     options.CustomSectionName = "OptiPowerTools"; // Section name for CustomSection placement
     options.CustomMenuItemName = "OptiPowerTools"; // Display name for the menu item
+    options.CmsShellPath = "/HangfireCms/Index";   // URL path for the CMS shell iframe page
 
     // Storage maintenance
     options.JobExpirationCheckInterval = TimeSpan.FromMinutes(15);
@@ -100,6 +101,7 @@ services.AddOptiPowerToolHangfire(options =>
       "MenuSortIndex": null,
       "CustomSectionName": "OptiPowerTools",
       "CustomMenuItemName": "OptiPowerTools",
+      "CmsShellPath": "/HangfireCms/Index",
       "JobExpirationCheckInterval": "00:15:00"
     }
   }
@@ -124,6 +126,7 @@ services.AddOptiPowerToolHangfire(options =>
 | `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
 | `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
 | `CustomMenuItemName` | `string` | `"OptiPowerTools"` | Display name for the Hangfire menu item in the CMS navigation. Falls back to `DashboardTitle` when empty. |
+| `CmsShellPath` | `string` | `"/HangfireCms/Index"` | URL path where the CMS shell page (iframe wrapper) is served. The CMS menu item links to this path. |
 | `JobExpirationCheckInterval` | `TimeSpan` | `00:15:00` | How often the expiration manager checks for and removes expired jobs. |
 
 ### Dashboard Authorization

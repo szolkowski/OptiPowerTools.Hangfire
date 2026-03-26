@@ -26,7 +26,6 @@ public class HangfireCmsController : Controller
     /// <summary>
     /// Renders the Hangfire dashboard embedded in the CMS shell.
     /// </summary>
-    [Route("/HangfireCms/Index")]
     [HttpGet]
     public IActionResult Index()
     {

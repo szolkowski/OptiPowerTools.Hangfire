@@ -3,6 +3,7 @@ using Hangfire.Console;
 using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OptiPowerTools.Hangfire.Authorization;
@@ -115,6 +116,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<OptimizelyDashboardAuthorizationFilter>();
         services.AddSingleton<HangfireMenuProvider>();
+        services.AddSingleton<IConfigureOptions<MvcOptions>, ConfigureHangfireMvcOptions>();
 
         services.AddOptiPowerToolHangfireTools();
     }
