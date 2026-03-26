@@ -31,7 +31,7 @@ services.AddOptiPowerToolHangfire(options =>
 app.UseOptiPowerToolHangfire();
 ```
 
-Connection string can point to the same database as Optimizely or to separate one.
+Connection string can point to the same database as Optimizely or to a separate one.
 
 That's it. This registers Hangfire with SQL Server storage, starts the background server, enables the dashboard with role-based auth, and adds a menu item to the CMS navigation.
 
@@ -124,7 +124,7 @@ services.AddOptiPowerToolHangfire(options =>
 | `MenuPlacement` | `CmsMenuPlacement` | `CmsSection` | Where the menu item appears: `CmsSection`, `TopLevel`, or `CustomSection`. See [Menu Placement](#menu-placement). |
 | `MenuPath` | `string?` | `null` | Overrides the auto-derived menu path. Takes precedence over `MenuPlacement` path logic. |
 | `MenuSortIndex` | `int?` | `null` | Overrides the auto-derived sort index for the menu item (or section in `CustomSection` mode). |
-| `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `CustomSection`. |
+| `CustomSectionName` | `string` | `"OptiPowerTools"` | Display name for the section group when `MenuPlacement` is `TopLevel` or `CustomSection`. |
 | `CustomMenuItemName` | `string` | `"OptiPowerTools"` | Display name for the Hangfire menu item in the CMS navigation. Falls back to `DashboardTitle` when empty. |
 | `CmsShellPath` | `string` | `"/HangfireCms/Index"` | URL path where the CMS shell page (iframe wrapper) is served. The CMS menu item links to this path. |
 | `JobExpirationCheckInterval` | `TimeSpan` | `00:15:00` | How often the expiration manager checks for and removes expired jobs. |
@@ -347,7 +347,7 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
 
 ### Prerequisites
 
-- .NET 6.0, 8.0, or 10.0 SDK
+- .NET 6.0, 8.0, 9.0, or 10.0 SDK
 - Docker (for SQL Server)
 - Git with submodule support
 
@@ -396,7 +396,7 @@ Tests run against `net6.0`, `net8.0`, `net9.0`, and `net10.0`.
 
 | Project | Purpose |
 |---------|---------|
-| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net10.0`) |
+| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net9.0`, `net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
 | `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net8.0`, references Foundation submodule) |
 | `tests/OptiPowerTools.Hangfire.Tests` | Unit tests for main library — xUnit + NSubstitute |
