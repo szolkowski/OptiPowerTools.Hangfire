@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
 
     <!-- NuGet Package Metadata -->
-    <Version>0.7.0</Version>
+    <Version>1.0.0</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Copyright>Stanisław Szołkowski 2026</Copyright>
     <Title>OptiPowerTools: Hangfire</Title>
@@ -22,7 +22,14 @@
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
     <RepositoryUrl>https://github.com/szolkowski/OptiPowerTools.Hangfire</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    
+
+    <!-- SourceLink & deterministic builds -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- Package validation -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeToolsAssembly</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
@@ -35,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="Hangfire.Core" Version="1.8.23" />
     <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
@@ -52,7 +60,7 @@
 
   <ItemGroup>
     <None Include="..\..\images\icon.png" Pack="true" PackagePath="icon.png" />
-    <None Include="..\..\images\OptiToolsHangfireDashboard.png" Pack="true" PackagePath="OptiToolsHangfireDashboard.png" />
+    <None Include="..\..\images\OptiToolsHangfireDashboard.png" Pack="true" PackagePath="images\OptiToolsHangfireDashboard.png" />
     <None Include="..\..\README.md" Pack="true" PackagePath="README.md" />
     <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="LICENSE.txt"/>
   </ItemGroup>
