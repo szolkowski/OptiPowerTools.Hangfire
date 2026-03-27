@@ -72,7 +72,7 @@ services.AddOptiPowerToolHangfire(options =>
     options.MenuPlacement = CmsMenuPlacement.CmsSection;
     options.MenuPath = null;        // Override the auto-derived menu path
     options.MenuSortIndex = null;   // Override the auto-derived sort index
-    options.CustomSectionName = "OptiPowerTools"; // Section name for CustomSection placement
+    options.CustomSectionName = "OptiPowerTools"; // Section name for TopLevel/CustomSection placement
     options.CustomMenuItemName = "OptiPowerTools"; // Display name for the menu item
     options.CmsShellPath = "/HangfireCms/Index";   // URL path for the CMS shell iframe page
 
