@@ -1,6 +1,7 @@
 using Hangfire;
 using OptiPowerTools.Hangfire.Extensions;
 using OptiPowerTools.Hangfire.Web.Jobs;
+using OptiPowerTools.Hangfire.Web.Samples;
 
 namespace OptiPowerTools.Hangfire.Web;
 
@@ -36,5 +37,10 @@ public class Startup
         RecurringJob.AddOrUpdate<ReportGeneratorJob>("report-gen", j => j.Execute(null!), Cron.Minutely);
         RecurringJob.AddOrUpdate<NotificationJob>("notification", j => j.Execute(null!), Cron.Minutely);
         RecurringJob.AddOrUpdate<MonthlyAuditJob>("monthly-audit", j => j.Execute(null!), Cron.Monthly);
+
+        RecurringJob.AddOrUpdate<ConsoleShowcaseJob>("console-showcase", j => j.Execute(null!), Cron.Hourly);
+        RecurringJob.AddOrUpdate<OrderPipelineJob>("order-pipeline", j => j.Start(null!), Cron.Hourly);
+        RecurringJob.AddOrUpdate<ScheduledCleanupJob>("scheduled-cleanup", j => j.Plan(null!), Cron.Daily);
+        RecurringJob.AddOrUpdate<CancellableExportJob>("cancellable-export", j => j.Execute(null!, null!), Cron.Daily);
     }
 }
