@@ -384,6 +384,19 @@ The site starts at `https://localhost:5001` or `http://localhost:5000`. Once run
 | `/HangfireCms/Index` | Hangfire dashboard (embedded in CMS shell) |
 | `/episerver/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
 
+### Sample jobs
+
+The `.Web` project includes sample jobs in the `Samples/` directory. These are not part of the NuGet package — they exist purely to showcase Hangfire and Hangfire.Console capabilities within Optimizely.
+
+| Job | What it demonstrates |
+|-----|----------------------|
+| `ConsoleShowcaseJob` | Hangfire.Console features: colored text, progress bars, and structured multi-phase output while processing fake product data |
+| `OrderPipelineJob` | Job continuations via `IBackgroundJobClient.ContinueJobWith` — chains four steps (Validate → Payment → Ship → Notify) where each step is a separate job |
+| `ScheduledCleanupJob` | Delayed execution via `IBackgroundJobClient.Schedule` — plans cleanup tasks with varying delays (1m, 5m, 15m) visible in the dashboard's Scheduled tab |
+| `CancellableExportJob` | Cancellation token support via `IJobCancellationToken` — processes 500 records slowly enough to cancel mid-run from the dashboard and see graceful shutdown |
+
+Trigger any sample job manually from the Hangfire dashboard's Recurring Jobs page, or wait for its schedule.
+
 ### Running tests
 
 ```bash
