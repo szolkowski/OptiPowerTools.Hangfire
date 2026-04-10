@@ -1,10 +1,8 @@
 name: Publish NuGet
 
 on:
-  release:
-    types: [published]
   push:
-    tags: ['v*']
+    tags: ['v1.*']
 
 jobs:
   publish:
@@ -12,7 +10,7 @@ jobs:
 
     permissions:
       packages: write
-      contents: read
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +21,7 @@ jobs:
           dotnet-version: |
             6.0.x
             8.0.x
+            9.0.x
             10.0.x
 
       - name: Pack
@@ -30,3 +29,17 @@ jobs:
 
       - name: Push to GitHub Packages
         run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/szolkowski/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        run: |
+          PRERELEASE=""
+          if [[ "${{ github.ref_name }}" == *"-beta"* ]]; then
+            PRERELEASE="--prerelease"
+          fi
+          gh release create "${{ github.ref_name }}" \
+            ./nupkg/*.nupkg \
+            --title "${{ github.ref_name }}" \
+            --generate-notes \
+            $PRERELEASE
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
