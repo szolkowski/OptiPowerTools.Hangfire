@@ -89,6 +89,8 @@ public static class ServiceCollectionExtensions
                 setupAction(options);
             });
 
+        services.AddHttpContextAccessor();
+
         services.AddHangfire((serviceProvider, config) =>
         {
             var options = serviceProvider.GetRequiredService<IOptions<OptiPowerToolHangfireOptions>>().Value;

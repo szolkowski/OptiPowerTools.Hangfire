@@ -2,22 +2,18 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <!-- Foundation uses BinaryFormatter (Commerce) which was removed in .NET 9; target .NET 8 for dev site -->
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <!-- NU1605: Package downgrade warnings from Foundation (net6.0) referenced in net8.0 host -->
-    <NoWarn>$(NoWarn);NU1605</NoWarn>
     <Configurations>Debug;Release;Debug-CmsSection;Debug-TopLevel;Debug-CustomSection</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\sub\foundation\src\Foundation\Foundation.csproj" />
     <ProjectReference Include="..\OptiPowerTools.Hangfire\OptiPowerTools.Hangfire.csproj" />
     <ProjectReference Include="..\OptiPowerTools.Hangfire.Tools\OptiPowerTools.Hangfire.Tools.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.3" />
+    <PackageReference Include="EPiServer.CMS" Version="[13.0.0,14.0.0)" />
   </ItemGroup>
 
 </Project>

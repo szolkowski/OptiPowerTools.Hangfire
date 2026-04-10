@@ -1,6 +1,6 @@
 # OptiPowerTools.Hangfire
 
-A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 12](https://www.optimizely.com/).
+A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 13](https://www.optimizely.com/).
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
 
@@ -14,7 +14,7 @@ This package was inspired by community feedback on the blog post [Adding Hangfir
 - Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
 - Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`, `RetainOnSuccess`)
-- Targets net6.0, net8.0, net9.0, net10.0
+- Targets net10.0 (Optimizely CMS 13 requires .NET 10)
 
 ![Hangfire Dashboard in Optimizely CMS](images/OptiToolsHangfireDashboard.png)
 
@@ -59,7 +59,7 @@ services.AddOptiPowerToolHangfire(options =>
     options.ConnectionString = "Server=.;Database=MyDb;Trusted_Connection=True;";
 
     // Optional — all values below are the defaults
-    options.DashboardPath = "/episerver/backoffice/Plugins/hangfire";
+    options.DashboardPath = "/optimizely/backoffice/Plugins/hangfire";
     options.DashboardTitle = "OptiPowerTools Hangfire Dashboard";
     options.AuthorizedRoles = ["Administrators", "CmsAdmins", "WebAdmins"];
     options.SchemaName = "hangfire";
@@ -88,7 +88,7 @@ services.AddOptiPowerToolHangfire(options =>
   "OptiPowerTools": {
     "Hangfire": {
       "ConnectionString": "Server=.;Database=MyDb;Trusted_Connection=True;",
-      "DashboardPath": "/episerver/backoffice/Plugins/hangfire",
+      "DashboardPath": "/optimizely/backoffice/Plugins/hangfire",
       "DashboardTitle": "OptiPowerTools Hangfire Dashboard",
       "AuthorizedRoles": ["Administrators", "CmsAdmins", "WebAdmins"],
       "SchemaName": "hangfire",
@@ -113,7 +113,7 @@ services.AddOptiPowerToolHangfire(options =>
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `ConnectionString` | `string` | `""` | **Required.** SQL Server connection string for Hangfire storage. |
-| `DashboardPath` | `string` | `"/episerver/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
+| `DashboardPath` | `string` | `"/optimizely/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
 | `DashboardTitle` | `string` | `"OptiPowerTools Hangfire Dashboard"` | Title shown in the dashboard header. |
 | `AuthorizedRoles` | `string[]` | `["Administrators", "CmsAdmins", "WebAdmins"]` | Optimizely roles allowed to access the dashboard. |
 | `SchemaName` | `string` | `"hangfire"` | SQL Server schema for Hangfire tables. |
@@ -343,29 +343,22 @@ This package is a thin configuration wrapper — it does not modify Hangfire int
 
 ## Development
 
-The solution includes a `.Web` project that references the [Optimizely Foundation](https://github.com/episerver/Foundation) site via a git submodule for manual testing.
+The solution includes a `.Web` project for manual testing with a minimal Optimizely CMS 13 setup.
 
 ### Prerequisites
 
-- .NET 6.0, 8.0, 9.0, or 10.0 SDK
+- .NET 10.0 SDK
 - Docker (for SQL Server)
-- Git with submodule support
 
 ### Getting started
 
-1. Clone the repository with submodules:
+1. Clone the repository:
 
    ```bash
-   git clone --recursive https://github.com/szolkowski/OptiPowerTools.Hangfire.git
+   git clone https://github.com/szolkowski/OptiPowerTools.Hangfire.git
    ```
 
-   If you already cloned without `--recursive`, initialize the submodule:
-
-   ```bash
-   git submodule update --init --recursive
-   ```
-
-   If you don't have Foundation DB configured, follow its README and add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
+   Add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
 
 2. Build and run:
 
@@ -378,11 +371,9 @@ The site starts at `https://localhost:5001` or `http://localhost:5000`. Once run
 
 | URL | Description |
 | --- | --- |
-| `/` | Foundation home page |
-| `/util/login` | CMS admin login |
-| `/episerver/cms` | CMS editorial UI |
+| `/optimizely/cms` | CMS editorial UI |
 | `/HangfireCms/Index` | Hangfire dashboard (embedded in CMS shell) |
-| `/episerver/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
+| `/optimizely/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
 
 ### Sample jobs
 
@@ -403,22 +394,28 @@ Trigger any sample job manually from the Hangfire dashboard's Recurring Jobs pag
 dotnet test
 ```
 
-Tests run against `net6.0`, `net8.0`, `net9.0`, and `net10.0`.
+Tests run against `net10.0`.
 
 ### Project structure
 
 | Project | Purpose |
 |---------|---------|
-| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net9.0`, `net10.0`) |
+| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
-| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net8.0`, references Foundation submodule) |
+| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net10.0`) |
 | `tests/OptiPowerTools.Hangfire.Tests` | Unit tests for main library — xUnit + NSubstitute |
 | `tests/OptiPowerTools.Hangfire.Tools.Tests` | Unit tests for Tools library — xUnit + NSubstitute |
-| `sub/foundation` | Git submodule — [episerver/Foundation](https://github.com/episerver/Foundation) |
 
-### Troubleshooting
+## Migrating from v1.x (CMS 12)
 
-- **`BinaryFormatter serialization ... have been removed`** — The project must target `net8.0`. Foundation's Commerce modules require `BinaryFormatter`.
+Version 2.0.0 targets Optimizely CMS 13 and .NET 10 only. If you are upgrading from v1.x:
+
+1. Update your project to target `net10.0`
+2. Update Optimizely CMS packages to 13.x
+3. Update the `OptiPowerTools.Hangfire` package to 2.x
+4. If you customized `DashboardPath`, note the default changed from `/episerver/backoffice/Plugins/hangfire` to `/optimizely/backoffice/Plugins/hangfire`
+
+For CMS 12 projects, continue using the 1.x package.
 
 ## License
 

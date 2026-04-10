@@ -12,7 +12,7 @@ public class OptiPowerToolHangfireOptionsTests
 
         // Assert
         Assert.Equal(string.Empty, options.ConnectionString);
-        Assert.Equal("/episerver/backoffice/Plugins/hangfire", options.DashboardPath);
+        Assert.Equal("/optimizely/backoffice/Plugins/hangfire", options.DashboardPath);
         Assert.Equal("OptiPowerTools Hangfire Dashboard", options.DashboardTitle);
         Assert.Equal("hangfire", options.SchemaName);
     }

@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
 
     <!-- NuGet Package Metadata -->
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Copyright>Stanisław Szołkowski 2026</Copyright>
     <Title>OptiPowerTools: Hangfire</Title>
-    <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 12. Includes SQL Server storage, dashboard with Optimizely role-based auth, CMS menu integration, Hangfire.Console support, built-in job filters for concurrency control and lifecycle management, and easy configuration via options pattern or appsettings.json.</Description>
+    <Description>One-liner bootstrap for Hangfire integration with Optimizely CMS 13. Includes SQL Server storage, dashboard with Optimizely role-based auth, CMS menu integration, Hangfire.Console support, built-in job filters for concurrency control and lifecycle management, and easy configuration via options pattern or appsettings.json.</Description>
     
     <PackageId>OptiPowerTools.Hangfire</PackageId>
     <PackageTags>Optimizely;Hangfire;CMS;BackgroundJobs;BackgroundProcessing;JobFilters;EPiServer</PackageTags>
@@ -27,8 +27,8 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-    <!-- Package validation -->
-    <EnablePackageValidation>true</EnablePackageValidation>
+    <!-- Package validation (disabled for 2.0.0 major version bump; re-enable with 2.0.0 as baseline) -->
+    <EnablePackageValidation>false</EnablePackageValidation>
 
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeToolsAssembly</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
@@ -50,8 +50,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPiServer.CMS.AspNetCore" Version="[12.0.3,13.0.0)" />
-    <PackageReference Include="EPiServer.CMS.UI.Core" Version="[12.0.3,13.0.0)" />
+    <PackageReference Include="EPiServer.CMS.AspNetCore" Version="[13.0.0,14.0.0)" />
+    <PackageReference Include="EPiServer.CMS.UI.Core" Version="[13.0.0,14.0.0)" />
   </ItemGroup>
 
   <ItemGroup>

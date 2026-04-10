@@ -5,8 +5,8 @@
 <html lang="en">
 <head>
     <title>@ViewBag.DashboardTitle</title>
-    @ClientResources.RenderResources("ShellCore")
-    @ClientResources.RenderResources("ShellCoreLightTheme")
+    <episerver-resources area="ShellCore" />
+    <episerver-resources area="ShellCoreLightTheme" />
     <style>
         html, body, .iframe-container {
             height: 100%;
@@ -22,11 +22,11 @@
     </style>
 </head>
 <body>
-    @Html.CreatePlatformNavigationMenu()
-    <div @Html.ApplyPlatformNavigation(additionalClass: "iframe-container")>
+    <platform-navigation />
+    <platform-navigation-wrapper additional-class="iframe-container">
         <iframe src="@ViewBag.DashboardPath" title="@ViewBag.DashboardTitle">
             <p>Your browser does not support iframes.</p>
         </iframe>
-    </div>
+    </platform-navigation-wrapper>
 </body>
 </html>

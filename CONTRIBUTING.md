@@ -4,10 +4,10 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ## Getting Started
 
-1. Fork the repository and clone with submodules:
+1. Fork the repository and clone:
 
    ```bash
-   git clone --recursive https://github.com/<your-username>/OptiPowerTools.Hangfire.git
+   git clone https://github.com/<your-username>/OptiPowerTools.Hangfire.git
    ```
 
 2. Create a branch for your change:
@@ -25,9 +25,8 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ## Development Setup
 
-- **.NET SDKs required:** 6.0, 8.0, 9.0, and 10.0
+- **.NET SDK required:** 10.0
 - **Docker** is needed for SQL Server (used by the dev web site)
-- The `sub/foundation/` submodule provides the Optimizely Foundation site for manual testing
 
 See the [README](README.md#development) for full setup instructions.
 
@@ -44,7 +43,7 @@ See the [README](README.md#development) for full setup instructions.
 - Use xUnit with NSubstitute for mocking
 - Follow the AAA pattern (Arrange, Act, Assert)
 - Use `[Theory]`/`[InlineData]` for parameterized tests
-- Tests run against net6.0, net8.0, net9.0, and net10.0
+- Tests run against net10.0
 
 Run the full test suite before submitting:
 
