@@ -1,6 +1,6 @@
 # OptiPowerTools.Hangfire
 
-A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 13](https://www.optimizely.com/).
+A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 13](https://www.optimizely.com/). For Optimizely CMS 12 support, use the [1.x release](https://github.com/szolkowski/OptiPowerTools.Hangfire/tree/releases/v1-release).
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
 
@@ -111,7 +111,7 @@ services.AddOptiPowerToolHangfire(options =>
 ### Options reference
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| ------ | ---- | ------- | ----------- |
 | `ConnectionString` | `string` | `""` | **Required.** SQL Server connection string for Hangfire storage. |
 | `DashboardPath` | `string` | `"/optimizely/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
 | `DashboardTitle` | `string` | `"OptiPowerTools Hangfire Dashboard"` | Title shown in the dashboard header. |
@@ -425,7 +425,7 @@ docker compose down -v            # Stop, remove containers, and delete volumes
 | `CmsSection` | `appsettings.CmsSection.json` | Under CMS section (default) |
 | `TopLevel` | `appsettings.TopLevel.json` | Top-level nav entry |
 | `CustomSection` | `appsettings.CustomSection.json` | Custom collapsible section |
-| `Development` | `appsettings.Development.json` | Custom test config |
+| `Development` | `appsettings.Development.json` | Default ASP.NET Core dev environment |
 | `NoSettingsConfig` | `appsettings.NoSettingsConfig.json` | No Hangfire options (defaults only) |
 
 Connection strings are passed via Docker environment variables (`CONNECTIONSTRINGS__EPISERVERDB` and `OptiPowerTools__Hangfire__ConnectionString`), which override values in appsettings files.
@@ -447,7 +447,7 @@ docker compose up web -d --force-recreate
 The `.Web` project includes sample jobs in the `Samples/` directory. These are not part of the NuGet package — they exist purely to showcase Hangfire and Hangfire.Console capabilities within Optimizely.
 
 | Job | What it demonstrates |
-|-----|----------------------|
+| --- | -------------------- |
 | `ConsoleShowcaseJob` | Hangfire.Console features: colored text, progress bars, and structured multi-phase output while processing fake product data |
 | `OrderPipelineJob` | Job continuations via `IBackgroundJobClient.ContinueJobWith` — chains four steps (Validate → Payment → Ship → Notify) where each step is a separate job |
 | `ScheduledCleanupJob` | Delayed execution via `IBackgroundJobClient.Schedule` — plans cleanup tasks with varying delays (1m, 5m, 15m) visible in the dashboard's Scheduled tab |
@@ -466,7 +466,7 @@ Tests run against `net10.0`.
 ### Project structure
 
 | Project | Purpose |
-|---------|---------|
+| ------- | ------- |
 | `src/OptiPowerTools.Hangfire` | The NuGet library package (`net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
 | `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net10.0`, references MyOptiAlloySite submodule) |
@@ -474,16 +474,23 @@ Tests run against `net10.0`.
 | `tests/OptiPowerTools.Hangfire.Tools.Tests` | Unit tests for Tools library — xUnit + NSubstitute |
 | `sub/MyOptiAlloySite` | Git submodule — [szolkowski/MyOptiAlloySite](https://github.com/szolkowski/MyOptiAlloySite) (Optimizely CMS 13 Alloy site) |
 
-## Migrating from v1.x (CMS 12)
+## Version compatibility
 
-Version 2.0.0 targets Optimizely CMS 13 and .NET 10 only. If you are upgrading from v1.x:
+| Package version | Optimizely CMS | .NET              |
+| --------------- | -------------- | ----------------- |
+| 2.x (current)   | CMS 13         | .NET 10           |
+| 1.x             | CMS 12         | .NET 6, 8, 9, 10  |
+
+**Optimizely CMS 12 users:** The 1.x line will continue to receive bug fixes and maintenance updates. You do not need to upgrade to 2.x unless you are migrating to CMS 13.
+
+### Migrating from v1.x to v2.x
+
+If you are upgrading from CMS 12 to CMS 13:
 
 1. Update your project to target `net10.0`
 2. Update Optimizely CMS packages to 13.x
-3. Update the `OptiPowerTools.Hangfire` package to 2.x
+3. Update the `OptiPowerTools.Hangfire` package to `2.0.0-beta` (or later 2.x release)
 4. If you customized `DashboardPath`, note the default changed from `/episerver/backoffice/Plugins/hangfire` to `/optimizely/backoffice/Plugins/hangfire`
-
-For CMS 12 projects, continue using the 1.x package.
 
 ## License
 
