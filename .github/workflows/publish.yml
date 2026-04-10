@@ -26,7 +26,7 @@ jobs:
         run: dotnet pack src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj -c Release -o ./nupkg
 
       - name: Push to GitHub Packages
-        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/szolkowski/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/szolkowski/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
 
       - name: Upload .nupkg to GitHub Release
         run: gh release upload "${{ github.ref_name }}" ./nupkg/*.nupkg --clobber
