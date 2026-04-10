@@ -396,6 +396,46 @@ Once running:
 | `/HangfireCms/Index` | Hangfire dashboard (embedded in CMS shell) |
 | `/optimizely/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
 
+### Docker compose reference
+
+The `docker-compose.yml` at the repo root defines two services:
+
+| Service | Description | Port |
+| ------- | ----------- | ---- |
+| `db` | SQL Server 2025 (reuses MyOptiAlloySite's Dockerfile) | `localhost:6000` |
+| `web` | Hangfire Web project (.NET 10 SDK, live reload via volume mount) | `localhost:5100` |
+
+**Common commands** (run from the repo root):
+
+```bash
+docker compose up -d              # Start both db and web
+docker compose up -d --build      # Rebuild and start (after code changes)
+docker compose up db -d           # Start only SQL Server (for local development)
+docker compose restart web        # Restart web container
+docker compose logs web --tail 50 # View recent web container logs
+docker compose logs web -f        # Follow web container logs live
+docker compose down               # Stop and remove containers
+docker compose down -v            # Stop, remove containers, and delete volumes
+```
+
+**Environment configuration:** The `ASPNETCORE_ENVIRONMENT` variable in `docker-compose.yml` controls which `appsettings.{Environment}.json` is loaded. Change it to switch menu placement configurations:
+
+| Value | Config file loaded | Menu placement |
+| ----- | ------------------ | -------------- |
+| `CmsSection` | `appsettings.CmsSection.json` | Under CMS section (default) |
+| `TopLevel` | `appsettings.TopLevel.json` | Top-level nav entry |
+| `CustomSection` | `appsettings.CustomSection.json` | Custom collapsible section |
+| `Development` | `appsettings.Development.json` | Custom test config |
+| `NoSettingsConfig` | `appsettings.NoSettingsConfig.json` | No Hangfire options (defaults only) |
+
+Connection strings are passed via Docker environment variables (`CONNECTIONSTRINGS__EPISERVERDB` and `OptiPowerTools__Hangfire__ConnectionString`), which override values in appsettings files.
+
+**Rebuilding after code changes:** The web container mounts the repo as a volume and uses `dotnet run`, so it compiles on startup. After changing source files, restart the container to pick up changes:
+
+```bash
+docker compose up web -d --build
+```
+
 ### Sample jobs
 
 The `.Web` project includes sample jobs in the `Samples/` directory. These are not part of the NuGet package — they exist purely to showcase Hangfire and Hangfire.Console capabilities within Optimizely.

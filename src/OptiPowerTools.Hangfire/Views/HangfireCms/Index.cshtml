@@ -2,28 +2,36 @@
     Layout = string.Empty;
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%; margin: 0; padding: 0; overflow: hidden;">
 <head>
     <title>@ViewBag.DashboardTitle</title>
     <episerver-resources area="ShellCore" />
     <episerver-resources area="ShellCoreLightTheme" />
     <style>
-        html, body, .iframe-container {
+        body {
             height: 100%;
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
-        iframe {
+        #episerver-resources-container {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .epi-pn-navigation--fixed-adjust {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .epi-pn-navigation--fixed-adjust iframe {
             width: 100%;
-            height: 100%;
+            height: calc(100vh - 50px);
             border: none;
         }
     </style>
 </head>
 <body>
     <platform-navigation />
-    <platform-navigation-wrapper additional-class="iframe-container">
+    <platform-navigation-wrapper>
         <iframe src="@ViewBag.DashboardPath" title="@ViewBag.DashboardTitle">
             <p>Your browser does not support iframes.</p>
         </iframe>
