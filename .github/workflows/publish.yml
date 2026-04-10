@@ -29,7 +29,7 @@ jobs:
         run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/szolkowski/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload .nupkg to GitHub Release
-        if: github.event_name == 'release'
-        run: gh release upload "${{ github.event.release.tag_name }}" ./nupkg/*.nupkg --clobber
+        run: gh release upload "${{ github.ref_name }}" ./nupkg/*.nupkg --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
