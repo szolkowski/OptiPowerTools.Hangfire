@@ -4,10 +4,10 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ## Getting Started
 
-1. Fork the repository and clone:
+1. Fork the repository and clone with submodules:
 
    ```bash
-   git clone https://github.com/<your-username>/OptiPowerTools.Hangfire.git
+   git clone --recursive https://github.com/<your-username>/OptiPowerTools.Hangfire.git
    ```
 
 2. Create a branch for your change:
@@ -27,6 +27,7 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 - **.NET SDK required:** 10.0
 - **Docker** is needed for SQL Server (used by the dev web site)
+- **Git with submodule support** — the `sub/MyOptiAlloySite/` submodule provides the Optimizely CMS 13 Alloy site for manual testing
 
 See the [README](README.md#development) for full setup instructions.
 

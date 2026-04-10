@@ -1,35 +1,23 @@
-using Hangfire;
-using OptiPowerTools.Hangfire.Extensions;
-using OptiPowerTools.Hangfire.Web.Jobs;
-using OptiPowerTools.Hangfire.Web.Samples;
+using OptiPowerTools.Hangfire.Web;
 
-var builder = WebApplication.CreateBuilder(args);
+var webProjectDir = Directory.GetCurrentDirectory();
 
-builder.Services.AddCms();
+Host.CreateDefaultBuilder(args)
+    .ConfigureCmsDefaults()
+    .ConfigureWebHostDefaults(webBuilder =>
+    {
+        webBuilder.UseStartup<Startup>();
+        webBuilder.UseContentRoot(Path.GetFullPath("../../sub/MyOptiAlloySite/MyOptiAlloySite"));
 
-builder.Services.AddOptiPowerToolHangfire(options =>
-{
-    options.ConnectionString = builder.Configuration.GetConnectionString("EPiServerDB")
-        ?? throw new InvalidOperationException("Hangfire connection string is not configured.");
-});
-
-var app = builder.Build();
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.UseOptiPowerToolHangfire();
-
-app.MapContent();
-
-RecurringJob.AddOrUpdate<DataImportJob>("data-import", j => j.Execute(null!), Cron.Minutely);
-RecurringJob.AddOrUpdate<DataExportJob>("data-export", j => j.Execute(null!), Cron.Minutely);
-RecurringJob.AddOrUpdate<ReportGeneratorJob>("report-gen", j => j.Execute(null!), Cron.Minutely);
-RecurringJob.AddOrUpdate<NotificationJob>("notification", j => j.Execute(null!), Cron.Minutely);
-RecurringJob.AddOrUpdate<MonthlyAuditJob>("monthly-audit", j => j.Execute(null!), Cron.Monthly);
-
-RecurringJob.AddOrUpdate<ConsoleShowcaseJob>("console-showcase", j => j.Execute(null!), Cron.Hourly);
-RecurringJob.AddOrUpdate<OrderPipelineJob>("order-pipeline", j => j.Start(null!), Cron.Hourly);
-RecurringJob.AddOrUpdate<ScheduledCleanupJob>("scheduled-cleanup", j => j.Plan(null!), Cron.Daily);
-RecurringJob.AddOrUpdate<CancellableExportJob>("cancellable-export", j => j.Execute(null!, null!), Cron.Daily);
-
-app.Run();
+        // Override MyOptiAlloySite's configuration with the web project's appsettings files,
+        // then re-add environment variables so Docker env vars take precedence
+        webBuilder.ConfigureAppConfiguration((context, config) =>
+        {
+            var env = context.HostingEnvironment;
+            config.AddJsonFile(Path.Combine(webProjectDir, "appsettings.json"), optional: true, reloadOnChange: true);
+            config.AddJsonFile(Path.Combine(webProjectDir, $"appsettings.{env.EnvironmentName}.json"), optional: true, reloadOnChange: true);
+            config.AddEnvironmentVariables();
+        });
+    })
+    .Build()
+    .Run();

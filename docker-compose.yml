@@ -1,0 +1,37 @@
+services:
+  db:
+    build:
+      dockerfile: Docker/db.dockerfile
+      context: ./sub/MyOptiAlloySite/MyOptiAlloySite
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_DIRECTORY: ${DB_DIRECTORY}
+    ports:
+      - 6000:1433
+    volumes:
+      - ./sub/MyOptiAlloySite/MyOptiAlloySite/App_Data:/var/opt/mssql/host_data/${DB_DIRECTORY}:ro
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$SA_PASSWORD" -Q "SELECT 1 FROM sys.databases WHERE name = '$$DB_NAME'" -C -h -1 | grep -q 1
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+
+  web:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      dockerfile: Docker/web.dockerfile
+      context: .
+    environment:
+      ASPNETCORE_URLS: http://*:80
+      ASPNETCORE_ENVIRONMENT: CmsSection
+      CONNECTIONSTRINGS__EPISERVERDB: Server=db;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};Encrypt=False;
+      OptiPowerTools__Hangfire__ConnectionString: Server=db;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};Encrypt=False;
+    ports:
+      - 5100:80
+    volumes:
+      - .:/src:rw
+    restart: on-failure

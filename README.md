@@ -343,31 +343,52 @@ This package is a thin configuration wrapper — it does not modify Hangfire int
 
 ## Development
 
-The solution includes a `.Web` project for manual testing with a minimal Optimizely CMS 13 setup.
+The solution includes a `.Web` project that references the [MyOptiAlloySite](https://github.com/szolkowski/MyOptiAlloySite) Optimizely CMS 13 site via a git submodule for manual testing. The site runs against SQL Server in Docker.
 
 ### Prerequisites
 
 - .NET 10.0 SDK
 - Docker (for SQL Server)
+- Git with submodule support
 
 ### Getting started
 
-1. Clone the repository:
+1. Clone the repository with submodules:
 
    ```bash
-   git clone https://github.com/szolkowski/OptiPowerTools.Hangfire.git
+   git clone --recursive https://github.com/szolkowski/OptiPowerTools.Hangfire.git
    ```
 
-   Add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
-
-2. Build and run:
+   If you already cloned without `--recursive`, initialize the submodule:
 
    ```bash
-   dotnet build
+   git submodule update --init --recursive
+   ```
+
+2. Create the `.env` file (copy the example):
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Option A — Docker (recommended):** Start everything with docker compose from the repo root:
+
+   ```bash
+   docker compose up -d
+   ```
+
+   The site starts at `http://localhost:5100`.
+
+   **Option B — Local:** Start only SQL Server in Docker, then run the site locally:
+
+   ```bash
+   docker compose up db -d
    dotnet run --project src/OptiPowerTools.Hangfire.Web
    ```
 
-The site starts at `https://localhost:5001` or `http://localhost:5000`. Once running:
+   The site starts at `https://localhost:5000`.
+
+Once running:
 
 | URL | Description |
 | --- | --- |
@@ -402,9 +423,10 @@ Tests run against `net10.0`.
 |---------|---------|
 | `src/OptiPowerTools.Hangfire` | The NuGet library package (`net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
-| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net10.0`) |
+| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net10.0`, references MyOptiAlloySite submodule) |
 | `tests/OptiPowerTools.Hangfire.Tests` | Unit tests for main library — xUnit + NSubstitute |
 | `tests/OptiPowerTools.Hangfire.Tools.Tests` | Unit tests for Tools library — xUnit + NSubstitute |
+| `sub/MyOptiAlloySite` | Git submodule — [szolkowski/MyOptiAlloySite](https://github.com/szolkowski/MyOptiAlloySite) (Optimizely CMS 13 Alloy site) |
 
 ## Migrating from v1.x (CMS 12)
 

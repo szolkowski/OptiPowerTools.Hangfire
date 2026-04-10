@@ -8,12 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\sub\MyOptiAlloySite\MyOptiAlloySite\MyOptiAlloySite.csproj" />
     <ProjectReference Include="..\OptiPowerTools.Hangfire\OptiPowerTools.Hangfire.csproj" />
     <ProjectReference Include="..\OptiPowerTools.Hangfire.Tools\OptiPowerTools.Hangfire.Tools.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="EPiServer.CMS" Version="[13.0.0,14.0.0)" />
   </ItemGroup>
 
 </Project>
