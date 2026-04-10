@@ -1,8 +1,13 @@
 <Project>
+  <!-- Override root Directory.Build.props for submodule projects.
+       Submodules have their own build conventions that we should not override. -->
   <PropertyGroup>
     <WarningLevel>0</WarningLevel>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <Nullable>disable</Nullable>
   </PropertyGroup>
 </Project>
