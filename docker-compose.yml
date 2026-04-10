@@ -27,7 +27,7 @@ services:
       context: .
     environment:
       ASPNETCORE_URLS: http://*:80
-      ASPNETCORE_ENVIRONMENT: CmsSection
+      ASPNETCORE_ENVIRONMENT: Development
       CONNECTIONSTRINGS__EPISERVERDB: Server=db;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};Encrypt=False;
       OptiPowerTools__Hangfire__ConnectionString: Server=db;Database=${DB_NAME};User Id=sa;Password=${SA_PASSWORD};Encrypt=False;
     ports:

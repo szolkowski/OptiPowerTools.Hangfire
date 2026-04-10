@@ -430,10 +430,16 @@ docker compose down -v            # Stop, remove containers, and delete volumes
 
 Connection strings are passed via Docker environment variables (`CONNECTIONSTRINGS__EPISERVERDB` and `OptiPowerTools__Hangfire__ConnectionString`), which override values in appsettings files.
 
-**Rebuilding after code changes:** The web container mounts the repo as a volume and uses `dotnet run`, so it compiles on startup. After changing source files, restart the container to pick up changes:
+**Rebuilding after code changes:** The web container mounts the repo as a volume and uses `dotnet run`, so it compiles on startup. After changing source files, rebuild the container:
 
 ```bash
 docker compose up web -d --build
+```
+
+**After changing `docker-compose.yml`** (e.g. `ASPNETCORE_ENVIRONMENT`): A simple `restart` won't pick up compose file changes — you need to recreate the container:
+
+```bash
+docker compose up web -d --force-recreate
 ```
 
 ### Sample jobs
