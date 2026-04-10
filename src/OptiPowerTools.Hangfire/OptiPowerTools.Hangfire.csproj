@@ -4,7 +4,7 @@
     <TargetFrameworks>net6.0;net8.0;net9.0;net10.0</TargetFrameworks>
 
     <!-- NuGet Package Metadata -->
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Copyright>Stanisław Szołkowski 2026</Copyright>
     <Title>OptiPowerTools: Hangfire</Title>

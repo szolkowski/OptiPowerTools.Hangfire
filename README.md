@@ -1,6 +1,8 @@
 # OptiPowerTools.Hangfire
 
-A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 12](https://www.optimizely.com/).
+A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 12](https://www.optimizely.com/). For Optimizely CMS 13 support, see the [`main` branch](https://github.com/szolkowski/OptiPowerTools.Hangfire/tree/main).
+
+> **Branch strategy:** This branch (`releases/v1-release`) contains the **1.x line** targeting Optimizely CMS 12 (.NET 6, 8, 9, 10) and will continue to receive bug fixes and maintenance updates. The [`main`](https://github.com/szolkowski/OptiPowerTools.Hangfire/tree/main) branch contains the **2.x line** targeting Optimizely CMS 13 (.NET 10 only).
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
 
@@ -111,7 +113,7 @@ services.AddOptiPowerToolHangfire(options =>
 ### Options reference
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| ------ | ---- | ------- | ----------- |
 | `ConnectionString` | `string` | `""` | **Required.** SQL Server connection string for Hangfire storage. |
 | `DashboardPath` | `string` | `"/episerver/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
 | `DashboardTitle` | `string` | `"OptiPowerTools Hangfire Dashboard"` | Title shown in the dashboard header. |
@@ -353,10 +355,10 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
 
 ### Getting started
 
-1. Clone the repository with submodules:
+1. Clone the repository with submodules (make sure to check out the v1.x branch):
 
    ```bash
-   git clone --recursive https://github.com/szolkowski/OptiPowerTools.Hangfire.git
+   git clone --recursive -b releases/v1-release https://github.com/szolkowski/OptiPowerTools.Hangfire.git
    ```
 
    If you already cloned without `--recursive`, initialize the submodule:
@@ -389,7 +391,7 @@ The site starts at `https://localhost:5001` or `http://localhost:5000`. Once run
 The `.Web` project includes sample jobs in the `Samples/` directory. These are not part of the NuGet package — they exist purely to showcase Hangfire and Hangfire.Console capabilities within Optimizely.
 
 | Job | What it demonstrates |
-|-----|----------------------|
+| --- | -------------------- |
 | `ConsoleShowcaseJob` | Hangfire.Console features: colored text, progress bars, and structured multi-phase output while processing fake product data |
 | `OrderPipelineJob` | Job continuations via `IBackgroundJobClient.ContinueJobWith` — chains four steps (Validate → Payment → Ship → Notify) where each step is a separate job |
 | `ScheduledCleanupJob` | Delayed execution via `IBackgroundJobClient.Schedule` — plans cleanup tasks with varying delays (1m, 5m, 15m) visible in the dashboard's Scheduled tab |
@@ -408,7 +410,7 @@ Tests run against `net6.0`, `net8.0`, `net9.0`, and `net10.0`.
 ### Project structure
 
 | Project | Purpose |
-|---------|---------|
+| ------- | ------- |
 | `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net9.0`, `net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
 | `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net8.0`, references Foundation submodule) |
