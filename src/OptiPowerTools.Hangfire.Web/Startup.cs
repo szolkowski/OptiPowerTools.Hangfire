@@ -42,12 +42,6 @@ public class Startup
     {
         _alloySiteStartup.Configure(app, env);
 
-        // Map the HangfireCmsController route (MyOptiAlloySite only maps content endpoints)
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
-
         app.UseOptiPowerToolHangfire();
 
         RecurringJob.AddOrUpdate<DataImportJob>("data-import", j => j.Execute(null!), Cron.Minutely);
