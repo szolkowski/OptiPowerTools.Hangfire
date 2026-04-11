@@ -13,9 +13,9 @@ public class OptiPowerToolHangfireOptions
 
     /// <summary>
     /// The URL path where the Hangfire dashboard will be accessible.
-    /// Defaults to "/episerver/backoffice/Plugins/hangfire".
+    /// Defaults to "/optimizely/backoffice/Plugins/hangfire".
     /// </summary>
-    public string DashboardPath { get; set; } = "/episerver/backoffice/Plugins/hangfire";
+    public string DashboardPath { get; set; } = "/optimizely/backoffice/Plugins/hangfire";
 
     /// <summary>
     /// The title displayed in the Hangfire dashboard header.

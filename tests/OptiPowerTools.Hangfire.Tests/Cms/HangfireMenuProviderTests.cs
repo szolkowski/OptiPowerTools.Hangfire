@@ -1,4 +1,5 @@
 using EPiServer.Shell.Navigation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using OptiPowerTools.Hangfire.Cms;
@@ -14,7 +15,8 @@ public class HangfireMenuProviderTests
         var opts = optiOptions ?? new OptiPowerToolHangfireOptions();
         var options = Substitute.For<IOptions<OptiPowerToolHangfireOptions>>();
         options.Value.Returns(opts);
-        return new HangfireMenuProvider(options);
+        var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+        return new HangfireMenuProvider(options, httpContextAccessor);
     }
 
     // === CmsSection (default, backward-compatible) ===

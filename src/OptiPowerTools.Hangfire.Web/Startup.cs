@@ -1,3 +1,4 @@
+using EPiServer.Scheduler;
 using Hangfire;
 using OptiPowerTools.Hangfire.Extensions;
 using OptiPowerTools.Hangfire.Web.Jobs;
@@ -7,28 +8,39 @@ namespace OptiPowerTools.Hangfire.Web;
 
 public class Startup
 {
-    private readonly Foundation.Startup _foundationStartup;
+    private readonly MyOptiAlloySite.Startup _alloySiteStartup;
     private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _environment;
 
     public Startup(IWebHostEnvironment webHostingEnvironment, IConfiguration configuration)
     {
-        _foundationStartup = new Foundation.Startup(webHostingEnvironment, configuration);
+        _alloySiteStartup = new MyOptiAlloySite.Startup(webHostingEnvironment);
         _configuration = configuration;
+        _environment = webHostingEnvironment;
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
-        _foundationStartup.ConfigureServices(services);
+        // Ensure DataDirectory and scheduler config are set for non-Development environments
+        // (MyOptiAlloySite.Startup only sets these in Development)
+        if (!_environment.IsDevelopment())
+        {
+            AppDomain.CurrentDomain.SetData("DataDirectory", Path.Combine(_environment.ContentRootPath, "App_Data"));
+            services.Configure<SchedulerOptions>(options => options.Enabled = false);
+        }
+
+        _alloySiteStartup.ConfigureServices(services);
 
         services.AddOptiPowerToolHangfire(options =>
         {
-            options.ConnectionString = _configuration.GetConnectionString("EPiServerDB") ?? throw new InvalidOperationException("Hangfire connection string is not configured.");
+            options.ConnectionString = _configuration.GetConnectionString("EPiServerDB")
+                ?? throw new InvalidOperationException("Hangfire connection string is not configured.");
         });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        _foundationStartup.Configure(app, env);
+        _alloySiteStartup.Configure(app, env);
 
         app.UseOptiPowerToolHangfire();
 

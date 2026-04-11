@@ -1,4 +1,5 @@
 using EPiServer.Shell.Navigation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using OptiPowerTools.Hangfire.Configuration;
 
@@ -13,14 +14,17 @@ namespace OptiPowerTools.Hangfire.Cms;
 public class HangfireMenuProvider : IMenuProvider
 {
     private readonly OptiPowerToolHangfireOptions _options;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     /// <summary>
     /// Initializes a new instance of <see cref="HangfireMenuProvider"/>.
     /// </summary>
     /// <param name="options">The Hangfire options for controlling menu visibility and roles.</param>
-    public HangfireMenuProvider(IOptions<OptiPowerToolHangfireOptions> options)
+    /// <param name="httpContextAccessor">The HTTP context accessor for retrieving the current user.</param>
+    public HangfireMenuProvider(IOptions<OptiPowerToolHangfireOptions> options, IHttpContextAccessor httpContextAccessor)
     {
         _options = options.Value;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     /// <inheritdoc />
@@ -103,7 +107,7 @@ public class HangfireMenuProvider : IMenuProvider
 
     private bool IsCurrentUserAuthorized()
     {
-        var principal = EPiServer.Security.PrincipalInfo.CurrentPrincipal;
+        var principal = _httpContextAccessor.HttpContext?.User;
         return principal?.Identity?.IsAuthenticated == true
             && _options.AuthorizedRoles is { } roles
             && roles.Any(principal.IsInRole);

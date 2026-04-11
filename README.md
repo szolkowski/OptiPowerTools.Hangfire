@@ -1,6 +1,6 @@
 # OptiPowerTools.Hangfire
 
-A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 12](https://www.optimizely.com/).
+A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 13](https://www.optimizely.com/). For Optimizely CMS 12 support, use the [1.x release](https://github.com/szolkowski/OptiPowerTools.Hangfire/tree/releases/v1-release).
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
 
@@ -14,7 +14,7 @@ This package was inspired by community feedback on the blog post [Adding Hangfir
 - Custom dashboard authorization — bring your own `IDashboardAuthorizationFilter` or disable auth entirely for development
 - Toggle individual features on/off (`EnableDashboard`, `EnableConsole`, `EnableCmsMenu`)
 - Built-in job filters for concurrency control (`MutualExclusion`, `WaitForOtherJobs`) and lifecycle management (`ExpireOnSuccess`, `RetainOnSuccess`)
-- Targets net6.0, net8.0, net9.0, net10.0
+- Targets net10.0 (Optimizely CMS 13 requires .NET 10)
 
 ![Hangfire Dashboard in Optimizely CMS](images/OptiToolsHangfireDashboard.png)
 
@@ -59,7 +59,7 @@ services.AddOptiPowerToolHangfire(options =>
     options.ConnectionString = "Server=.;Database=MyDb;Trusted_Connection=True;";
 
     // Optional — all values below are the defaults
-    options.DashboardPath = "/episerver/backoffice/Plugins/hangfire";
+    options.DashboardPath = "/optimizely/backoffice/Plugins/hangfire";
     options.DashboardTitle = "OptiPowerTools Hangfire Dashboard";
     options.AuthorizedRoles = ["Administrators", "CmsAdmins", "WebAdmins"];
     options.SchemaName = "hangfire";
@@ -88,7 +88,7 @@ services.AddOptiPowerToolHangfire(options =>
   "OptiPowerTools": {
     "Hangfire": {
       "ConnectionString": "Server=.;Database=MyDb;Trusted_Connection=True;",
-      "DashboardPath": "/episerver/backoffice/Plugins/hangfire",
+      "DashboardPath": "/optimizely/backoffice/Plugins/hangfire",
       "DashboardTitle": "OptiPowerTools Hangfire Dashboard",
       "AuthorizedRoles": ["Administrators", "CmsAdmins", "WebAdmins"],
       "SchemaName": "hangfire",
@@ -111,9 +111,9 @@ services.AddOptiPowerToolHangfire(options =>
 ### Options reference
 
 | Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| ------ | ---- | ------- | ----------- |
 | `ConnectionString` | `string` | `""` | **Required.** SQL Server connection string for Hangfire storage. |
-| `DashboardPath` | `string` | `"/episerver/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
+| `DashboardPath` | `string` | `"/optimizely/backoffice/Plugins/hangfire"` | URL path where the Hangfire dashboard is served. |
 | `DashboardTitle` | `string` | `"OptiPowerTools Hangfire Dashboard"` | Title shown in the dashboard header. |
 | `AuthorizedRoles` | `string[]` | `["Administrators", "CmsAdmins", "WebAdmins"]` | Optimizely roles allowed to access the dashboard. |
 | `SchemaName` | `string` | `"hangfire"` | SQL Server schema for Hangfire tables. |
@@ -343,11 +343,11 @@ This package is a thin configuration wrapper — it does not modify Hangfire int
 
 ## Development
 
-The solution includes a `.Web` project that references the [Optimizely Foundation](https://github.com/episerver/Foundation) site via a git submodule for manual testing.
+The solution includes a `.Web` project that references the [MyOptiAlloySite](https://github.com/szolkowski/MyOptiAlloySite) Optimizely CMS 13 site via a git submodule for manual testing. The site runs against SQL Server in Docker.
 
 ### Prerequisites
 
-- .NET 6.0, 8.0, 9.0, or 10.0 SDK
+- .NET 10.0 SDK
 - Docker (for SQL Server)
 - Git with submodule support
 
@@ -365,31 +365,89 @@ The solution includes a `.Web` project that references the [Optimizely Foundatio
    git submodule update --init --recursive
    ```
 
-   If you don't have Foundation DB configured, follow its README and add connection strings to `src/OptiPowerTools.Hangfire.Web/appsettings.json` or `src/OptiPowerTools.Hangfire.Web/appsettings.Development.json`.
-
-2. Build and run:
+2. Create the `.env` file (copy the example):
 
    ```bash
-   dotnet build
+   cp .env.example .env
+   ```
+
+3. **Option A — Docker (recommended):** Start everything with docker compose from the repo root:
+
+   ```bash
+   docker compose up -d
+   ```
+
+   The site starts at `http://localhost:5100`.
+
+   **Option B — Local:** Start only SQL Server in Docker, then run the site locally:
+
+   ```bash
+   docker compose up db -d
    dotnet run --project src/OptiPowerTools.Hangfire.Web
    ```
 
-The site starts at `https://localhost:5001` or `http://localhost:5000`. Once running:
+   The site starts at `https://localhost:5000`.
+
+Once running:
 
 | URL | Description |
 | --- | --- |
-| `/` | Foundation home page |
-| `/util/login` | CMS admin login |
-| `/episerver/cms` | CMS editorial UI |
+| `/optimizely/cms` | CMS editorial UI |
 | `/HangfireCms/Index` | Hangfire dashboard (embedded in CMS shell) |
-| `/episerver/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
+| `/optimizely/backoffice/Plugins/hangfire` | Hangfire dashboard (standalone) |
+
+### Docker compose reference
+
+The `docker-compose.yml` at the repo root defines two services:
+
+| Service | Description | Port |
+| ------- | ----------- | ---- |
+| `db` | SQL Server 2025 (reuses MyOptiAlloySite's Dockerfile) | `localhost:6000` |
+| `web` | Hangfire Web project (.NET 10 SDK, live reload via volume mount) | `localhost:5100` |
+
+**Common commands** (run from the repo root):
+
+```bash
+docker compose up -d              # Start both db and web
+docker compose up -d --build      # Rebuild and start (after code changes)
+docker compose up db -d           # Start only SQL Server (for local development)
+docker compose restart web        # Restart web container
+docker compose logs web --tail 50 # View recent web container logs
+docker compose logs web -f        # Follow web container logs live
+docker compose down               # Stop and remove containers
+docker compose down -v            # Stop, remove containers, and delete volumes
+```
+
+**Environment configuration:** The `ASPNETCORE_ENVIRONMENT` variable in `docker-compose.yml` controls which `appsettings.{Environment}.json` is loaded. Change it to switch menu placement configurations:
+
+| Value | Config file loaded | Menu placement |
+| ----- | ------------------ | -------------- |
+| `CmsSection` | `appsettings.CmsSection.json` | Under CMS section (default) |
+| `TopLevel` | `appsettings.TopLevel.json` | Top-level nav entry |
+| `CustomSection` | `appsettings.CustomSection.json` | Custom collapsible section |
+| `Development` | `appsettings.Development.json` | Default ASP.NET Core dev environment |
+| `NoSettingsConfig` | `appsettings.NoSettingsConfig.json` | No Hangfire options (defaults only) |
+
+Connection strings are passed via Docker environment variables (`CONNECTIONSTRINGS__EPISERVERDB` and `OptiPowerTools__Hangfire__ConnectionString`), which override values in appsettings files.
+
+**Rebuilding after code changes:** The web container mounts the repo as a volume and uses `dotnet run`, so it compiles on startup. After changing source files, rebuild the container:
+
+```bash
+docker compose up web -d --build
+```
+
+**After changing `docker-compose.yml`** (e.g. `ASPNETCORE_ENVIRONMENT`): A simple `restart` won't pick up compose file changes — you need to recreate the container:
+
+```bash
+docker compose up web -d --force-recreate
+```
 
 ### Sample jobs
 
 The `.Web` project includes sample jobs in the `Samples/` directory. These are not part of the NuGet package — they exist purely to showcase Hangfire and Hangfire.Console capabilities within Optimizely.
 
 | Job | What it demonstrates |
-|-----|----------------------|
+| --- | -------------------- |
 | `ConsoleShowcaseJob` | Hangfire.Console features: colored text, progress bars, and structured multi-phase output while processing fake product data |
 | `OrderPipelineJob` | Job continuations via `IBackgroundJobClient.ContinueJobWith` — chains four steps (Validate → Payment → Ship → Notify) where each step is a separate job |
 | `ScheduledCleanupJob` | Delayed execution via `IBackgroundJobClient.Schedule` — plans cleanup tasks with varying delays (1m, 5m, 15m) visible in the dashboard's Scheduled tab |
@@ -403,22 +461,36 @@ Trigger any sample job manually from the Hangfire dashboard's Recurring Jobs pag
 dotnet test
 ```
 
-Tests run against `net6.0`, `net8.0`, `net9.0`, and `net10.0`.
+Tests run against `net10.0`.
 
 ### Project structure
 
 | Project | Purpose |
-|---------|---------|
-| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net6.0`, `net8.0`, `net9.0`, `net10.0`) |
+| ------- | ------- |
+| `src/OptiPowerTools.Hangfire` | The NuGet library package (`net10.0`) |
 | `src/OptiPowerTools.Hangfire.Tools` | CMS-agnostic job filters and utilities (bundled into the main NuGet package) |
-| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net8.0`, references Foundation submodule) |
+| `src/OptiPowerTools.Hangfire.Web` | Dev site for manual testing (`net10.0`, references MyOptiAlloySite submodule) |
 | `tests/OptiPowerTools.Hangfire.Tests` | Unit tests for main library — xUnit + NSubstitute |
 | `tests/OptiPowerTools.Hangfire.Tools.Tests` | Unit tests for Tools library — xUnit + NSubstitute |
-| `sub/foundation` | Git submodule — [episerver/Foundation](https://github.com/episerver/Foundation) |
+| `sub/MyOptiAlloySite` | Git submodule — [szolkowski/MyOptiAlloySite](https://github.com/szolkowski/MyOptiAlloySite) (Optimizely CMS 13 Alloy site) |
 
-### Troubleshooting
+## Version compatibility
 
-- **`BinaryFormatter serialization ... have been removed`** — The project must target `net8.0`. Foundation's Commerce modules require `BinaryFormatter`.
+| Package version | Optimizely CMS | .NET              |
+| --------------- | -------------- | ----------------- |
+| 2.x (current)   | CMS 13         | .NET 10           |
+| 1.x             | CMS 12         | .NET 6, 8, 9, 10  |
+
+**Optimizely CMS 12 users:** The 1.x line will continue to receive bug fixes and maintenance updates. You do not need to upgrade to 2.x unless you are migrating to CMS 13.
+
+### Migrating from v1.x to v2.x
+
+If you are upgrading from CMS 12 to CMS 13:
+
+1. Update your project to target `net10.0`
+2. Update Optimizely CMS packages to 13.x
+3. Update the `OptiPowerTools.Hangfire` package to `2.0.0-beta` (or later 2.x release)
+4. If you customized `DashboardPath`, note the default changed from `/episerver/backoffice/Plugins/hangfire` to `/optimizely/backoffice/Plugins/hangfire`
 
 ## License
 
