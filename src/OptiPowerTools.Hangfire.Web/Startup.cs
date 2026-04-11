@@ -14,7 +14,7 @@ public class Startup
 
     public Startup(IWebHostEnvironment webHostingEnvironment, IConfiguration configuration)
     {
-        _alloySiteStartup = new MyOptiAlloySite.Startup(webHostingEnvironment);
+        _alloySiteStartup = new MyOptiAlloySite.Startup(webHostingEnvironment, configuration);
         _configuration = configuration;
         _environment = webHostingEnvironment;
     }
@@ -42,6 +42,7 @@ public class Startup
     {
         _alloySiteStartup.Configure(app, env);
 
+        app.UseEndpoints(endpoints => endpoints.MapControllers());
         app.UseOptiPowerToolHangfire();
 
         RecurringJob.AddOrUpdate<DataImportJob>("data-import", j => j.Execute(null!), Cron.Minutely);

@@ -337,6 +337,22 @@ Neither filter prevents the same job type from running concurrently with itself.
 public class DataImportJob { /* ... */ }
 ```
 
+## Important: MapControllers requirement
+
+The Hangfire CMS shell page (`/HangfireCms/Index`) is served by an MVC controller. If your application only calls `MapContent()` without `MapControllers()`, you must add it to your endpoint configuration:
+
+```csharp
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapContent();
+    endpoints.MapControllers();
+});
+
+app.UseOptiPowerToolHangfire();
+```
+
+Most Optimizely CMS setups already include `MapControllers()`. If you see a **404 on `/HangfireCms/Index`**, this is the likely cause.
+
 ## Removing this package
 
 This package is a thin configuration wrapper — it does not modify Hangfire internals or change the way Hangfire stores data. If your project outgrows it and you need full control, simply remove the package and configure Hangfire manually. Your existing database, jobs, and history will continue to work without any migration or data changes.
@@ -489,7 +505,7 @@ If you are upgrading from CMS 12 to CMS 13:
 
 1. Update your project to target `net10.0`
 2. Update Optimizely CMS packages to 13.x
-3. Update the `OptiPowerTools.Hangfire` package to `2.0.0-beta` (or later 2.x release)
+3. Update the `OptiPowerTools.Hangfire` package to 2.x
 4. If you customized `DashboardPath`, note the default changed from `/episerver/backoffice/Plugins/hangfire` to `/optimizely/backoffice/Plugins/hangfire`
 
 ## License
