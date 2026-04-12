@@ -42,7 +42,7 @@ public class Startup
     {
         _alloySiteStartup.Configure(app, env);
 
-        app.UseEndpoints(endpoints => endpoints.MapControllers());
+       //app.UseEndpoints(endpoints => endpoints.MapControllers());
         app.UseOptiPowerToolHangfire();
 
         RecurringJob.AddOrUpdate<DataImportJob>("data-import", j => j.Execute(null!), Cron.Minutely);
