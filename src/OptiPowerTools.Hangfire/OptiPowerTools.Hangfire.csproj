@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
 
     <!-- NuGet Package Metadata -->
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <Authors>Stanisław Szołkowski</Authors>
     <Copyright>Stanisław Szołkowski 2026</Copyright>
     <Title>OptiPowerTools: Hangfire</Title>
@@ -27,8 +27,8 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-    <!-- Package validation (disabled for 2.0.0 major version bump; re-enable with 2.0.0 as baseline) -->
-    <EnablePackageValidation>false</EnablePackageValidation>
+
+    <EnablePackageValidation>true</EnablePackageValidation>
 
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeToolsAssembly</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>

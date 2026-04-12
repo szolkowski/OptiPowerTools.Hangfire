@@ -34,4 +34,4 @@ services:
       - 5100:80
     volumes:
       - .:/src:rw
-    restart: on-failure
+    restart: unless-stopped
