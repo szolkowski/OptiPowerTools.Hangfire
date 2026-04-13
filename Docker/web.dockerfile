@@ -17,6 +17,9 @@ RUN dotnet restore src/OptiPowerTools.Hangfire.Web/OptiPowerTools.Hangfire.Web.c
 
 WORKDIR /src/src/OptiPowerTools.Hangfire.Web
 
+RUN useradd -m appuser
+USER appuser
+
 EXPOSE 80
 EXPOSE 443
 
