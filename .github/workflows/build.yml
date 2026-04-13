@@ -37,6 +37,10 @@ jobs:
           dotnet restore tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj
           dotnet restore tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj
 
+      - name: Extract version from csproj
+        id: version
+        run: echo "value=$(grep '<Version>' src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/')" >> "$GITHUB_OUTPUT"
+
       - name: Begin SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -44,6 +48,7 @@ jobs:
           dotnet-sonarscanner begin \
             /k:"szolkowski_OptiPowerTools.Hangfire" \
             /o:"szolkowski" \
+            /v:"${{ steps.version.outputs.value }}" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
