@@ -1,5 +1,10 @@
 # OptiPowerTools.Hangfire
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=szolkowski_OptiPowerTools.Hangfire&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=szolkowski_OptiPowerTools.Hangfire)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=szolkowski_OptiPowerTools.Hangfire&metric=coverage)](https://sonarcloud.io/summary/new_code?id=szolkowski_OptiPowerTools.Hangfire)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=szolkowski_OptiPowerTools.Hangfire&metric=bugs)](https://sonarcloud.io/summary/new_code?id=szolkowski_OptiPowerTools.Hangfire)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=szolkowski_OptiPowerTools.Hangfire&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=szolkowski_OptiPowerTools.Hangfire)
+
 A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background job processing to [Optimizely CMS 13](https://www.optimizely.com/). For Optimizely CMS 12 support, use the [1.x release](https://github.com/szolkowski/OptiPowerTools.Hangfire/tree/releases/v1-release).
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
