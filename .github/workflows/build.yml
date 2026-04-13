@@ -12,29 +12,57 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'
+
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
       - name: Restore
         run: dotnet restore src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj
 
-      - name: Restore Tools Tests
-        run: dotnet restore tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj
+      - name: Restore Tests
+        run: |
+          dotnet restore tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj
+          dotnet restore tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj
+
+      - name: Begin SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet-sonarscanner begin \
+            /k:"szolkowski_OptiPowerTools.Hangfire" \
+            /o:"szolkowski" \
+            /d:sonar.token="${SONAR_TOKEN}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
 
       - name: Build
-        run: dotnet build src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-restore -c Release
-
-      - name: Build Tools
-        run: dotnet build src/OptiPowerTools.Hangfire.Tools/OptiPowerTools.Hangfire.Tools.csproj --no-restore -c Release
+        run: |
+          dotnet build src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-restore -c Release
+          dotnet build src/OptiPowerTools.Hangfire.Tools/OptiPowerTools.Hangfire.Tools.csproj --no-restore -c Release
 
       - name: Test
-        run: dotnet test tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj -c Release --collect:"XPlat Code Coverage"
+        run: |
+          dotnet test tests/OptiPowerTools.Hangfire.Tests/OptiPowerTools.Hangfire.Tests.csproj -c Release --logger "trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          dotnet test tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj -c Release --logger "trx" --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-      - name: Test Tools
-        run: dotnet test tests/OptiPowerTools.Hangfire.Tools.Tests/OptiPowerTools.Hangfire.Tools.Tests.csproj -c Release --collect:"XPlat Code Coverage"
+      - name: End SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet-sonarscanner end /d:sonar.token="${SONAR_TOKEN}"
 
       - name: Pack
         run: dotnet pack src/OptiPowerTools.Hangfire/OptiPowerTools.Hangfire.csproj --no-build -c Release
