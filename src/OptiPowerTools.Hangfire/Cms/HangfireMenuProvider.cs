@@ -116,14 +116,16 @@ public class HangfireMenuProvider : IMenuProvider
     private static string NormalizePath(string path) =>
         path.StartsWith('/') ? path : "/" + path;
 
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
+
     private static string ToSlug(string name)
     {
         var slug = name.ToLowerInvariant()
             .Replace(' ', '-')
             .Replace('_', '-')
             .Replace('.', '-');
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "");
-        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-{2,}", "-");
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout);
+        slug = System.Text.RegularExpressions.Regex.Replace(slug, @"-{2,}", "-", System.Text.RegularExpressions.RegexOptions.None, RegexTimeout);
         return slug.Trim('-');
     }
 }
