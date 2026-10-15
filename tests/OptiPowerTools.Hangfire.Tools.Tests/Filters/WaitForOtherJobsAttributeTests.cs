@@ -12,17 +12,17 @@ public class WaitForOtherJobsAttributeTests
 {
     private class StubJobA
     {
-        public void Execute() { }
+        public static void Execute() { }
     }
 
     private class StubJobB
     {
-        public void Execute() { }
+        public static void Execute() { }
     }
 
     private class StubJobC
     {
-        public void Execute() { }
+        public static void Execute() { }
     }
 
     private class TestableWaitForOtherJobs(params Type[] jobTypes) : WaitForOtherJobsAttribute(jobTypes)

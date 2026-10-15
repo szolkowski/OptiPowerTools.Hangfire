@@ -13,7 +13,7 @@ namespace OptiPowerTools.Hangfire.Tests.Extensions;
 
 public class ApplicationBuilderExtensionsTests
 {
-    private static IServiceProvider CreateServiceProvider(
+    private static ServiceProvider CreateServiceProvider(
         OptiPowerToolHangfireOptions? options = null,
         IDashboardAuthorizationFilter? customFilter = null)
     {
