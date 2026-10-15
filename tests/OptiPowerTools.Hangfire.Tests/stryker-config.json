@@ -1,0 +1,16 @@
+{
+  "stryker-config": {
+    "project": "OptiPowerTools.Hangfire.csproj",
+    "configuration": "Release",
+    "reporters": [
+      "html",
+      "progress",
+      "cleartext"
+    ],
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 0
+    }
+  }
+}

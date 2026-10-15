@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 .claude/
 src/OptiPowerTools.Hangfire.Web/appsettings.*.json
+
+# Stryker.NET mutation testing output
+StrykerOutput/

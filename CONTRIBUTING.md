@@ -52,6 +52,18 @@ Run the full test suite before submitting:
 dotnet test
 ```
 
+### Mutation Testing
+
+[Stryker.NET](https://stryker-mutator.io/docs/stryker-net/introduction/) is installed as a local dotnet tool and configured per test project (`stryker-config.json`). Run it from a test project directory:
+
+```bash
+dotnet tool restore
+cd tests/OptiPowerTools.Hangfire.Tests   # or tests/OptiPowerTools.Hangfire.Tools.Tests
+dotnet stryker
+```
+
+The HTML report is written to `StrykerOutput/<timestamp>/reports/mutation-report.html`. Surviving mutants point to behavior your tests don't verify.
+
 ## Submitting Changes
 
 1. Ensure all tests pass and the build is warning-free
