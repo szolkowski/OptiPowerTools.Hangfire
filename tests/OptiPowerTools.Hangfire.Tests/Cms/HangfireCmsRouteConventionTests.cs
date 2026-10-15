@@ -11,7 +11,7 @@ public class HangfireCmsRouteConventionTests
 
     private class OtherController : Controller
     {
-        public IActionResult Index() => Ok();
+        public OkResult Index() => Ok();
     }
 
     private static ControllerModel CreateControllerModel<TController>(params string[] actionNames)

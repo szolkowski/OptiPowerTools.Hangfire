@@ -22,7 +22,7 @@ public class HangfireMenuProviderTests
         return new HangfireMenuProvider(options, httpContextAccessor);
     }
 
-    private static HttpContext CreateHttpContext(bool isAuthenticated, params string[] roles)
+    private static DefaultHttpContext CreateHttpContext(bool isAuthenticated, params string[] roles)
     {
         var claims = new List<Claim>();
         if (isAuthenticated)

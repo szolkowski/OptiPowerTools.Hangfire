@@ -172,7 +172,7 @@ public class ApplicationBuilderExtensionsTests
         Assert.Equal(StatusCodes.Status404NotFound, httpContext.Response.StatusCode);
     }
 
-    private static IServiceProvider CreateDashboardServiceProvider(
+    private static ServiceProvider CreateDashboardServiceProvider(
         OptiPowerToolHangfireOptions options,
         IDashboardAuthorizationFilter customFilter)
     {

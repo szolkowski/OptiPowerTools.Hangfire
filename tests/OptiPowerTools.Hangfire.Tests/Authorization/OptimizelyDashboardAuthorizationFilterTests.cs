@@ -138,7 +138,7 @@ public class OptimizelyDashboardAuthorizationFilterTests
         Assert.False(filter.Authorize(context));
     }
 
-    private static DashboardContext CreateDashboardContext(ClaimsPrincipal user) =>
+    private static AspNetCoreDashboardContext CreateDashboardContext(ClaimsPrincipal user) =>
         new AspNetCoreDashboardContext(
             Substitute.For<JobStorage>(),
             new DashboardOptions(),
