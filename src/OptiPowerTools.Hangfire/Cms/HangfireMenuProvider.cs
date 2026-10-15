@@ -52,7 +52,7 @@ public class HangfireMenuProvider : IMenuProvider
         var sectionName = string.IsNullOrEmpty(_options.CustomSectionName) ? _options.DashboardTitle : _options.CustomSectionName;
         var sectionSlug = ToSlug(sectionName);
         var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;
-        var sectionPath = string.IsNullOrEmpty(_options.MenuPath) ? "/" + sectionSlug : NormalizePath(_options.MenuPath);
+        var sectionPath = NormalizePath(string.IsNullOrEmpty(_options.MenuPath) ? sectionSlug : _options.MenuPath);
         var itemPath = sectionPath + "/hangfire";
 
         var section = new SectionMenuItem(sectionName, MenuPaths.Global + sectionPath)
@@ -61,7 +61,7 @@ public class HangfireMenuProvider : IMenuProvider
             SortIndex = sectionSortIndex
         };
 
-        var item = BuildUrlMenuItem(itemPath).First();
+        var item = BuildUrlMenuItem(itemPath)[0];
 
         return [section, item];
     }
@@ -85,7 +85,7 @@ public class HangfireMenuProvider : IMenuProvider
     {
         var sectionName = string.IsNullOrEmpty(_options.CustomSectionName) ? _options.DashboardTitle : _options.CustomSectionName;
         var sectionSlug = ToSlug(sectionName);
-        var sectionPath = MenuPaths.Global + (string.IsNullOrEmpty(_options.MenuPath) ? "/" + sectionSlug : NormalizePath(_options.MenuPath));
+        var sectionPath = MenuPaths.Global + NormalizePath(string.IsNullOrEmpty(_options.MenuPath) ? sectionSlug : _options.MenuPath);
         var itemPath = sectionPath + "/hangfire";
         var menuItemName = string.IsNullOrEmpty(_options.CustomMenuItemName) ? _options.DashboardTitle : _options.CustomMenuItemName;
         var sectionSortIndex = _options.MenuSortIndex ?? SortIndex.Last - 10;

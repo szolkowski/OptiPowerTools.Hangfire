@@ -23,4 +23,4 @@ USER appuser
 EXPOSE 80
 EXPOSE 443
 
-ENTRYPOINT dotnet run --no-launch-profile
+ENTRYPOINT ["dotnet", "run", "--no-launch-profile"]
