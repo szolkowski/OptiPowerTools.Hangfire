@@ -253,4 +253,26 @@ public class MutualExclusionAttributeTests
         Assert.Null(exception);
         Assert.False(context.Items.ContainsKey("MutualExclusion:Lock"));
     }
+
+    [Fact]
+    public void OnPerforming_LockTimeout_ReschedulesJobWithRetryDelayAndReason()
+    {
+        var connection = Substitute.For<IStorageConnection>();
+        connection.AcquireDistributedLock(Arg.Any<string>(), Arg.Any<TimeSpan>())
+            .Throws(new DistributedLockTimeoutException(_testResource));
+        var storage = Substitute.For<JobStorage>();
+        var transaction = RescheduleTestHelper.SetUpStateChange(storage, "test-job-id");
+        var context = CreatePerformingContext(connection: connection, storage: storage);
+        var filter = new MutualExclusionAttribute(_testResource) { RetryDelaySeconds = 42 };
+
+        filter.OnPerforming(context);
+
+        Assert.True(context.Canceled);
+        var state = RescheduleTestHelper.GetAppliedScheduledState(transaction, "test-job-id");
+        Assert.Equal($"Resource '{_testResource}' is locked by another job", state.Reason);
+        Assert.InRange(
+            state.EnqueueAt - DateTime.UtcNow,
+            TimeSpan.FromSeconds(40),
+            TimeSpan.FromSeconds(42));
+    }
 }

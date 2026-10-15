@@ -1,5 +1,7 @@
+using Hangfire;
 using Hangfire.Dashboard;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -122,4 +124,76 @@ public class ApplicationBuilderExtensionsTests
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => HangfireAppBuilderExtensions.UseOptiPowerToolHangfire(app));
     }
+
+    [Fact]
+    public async Task UseOptiPowerToolHangfire_EnableDashboardTrue_MapsDashboardWithConfiguredAuthorization()
+    {
+        // Arrange
+        var customFilter = Substitute.For<IDashboardAuthorizationFilter>();
+        customFilter.Authorize(Arg.Any<DashboardContext>()).Returns(false);
+        var options = new OptiPowerToolHangfireOptions { EnableDashboard = true, DashboardPath = "/jobs" };
+        var app = new ApplicationBuilder(CreateDashboardServiceProvider(options, customFilter));
+
+        // Act
+        HangfireAppBuilderExtensions.UseOptiPowerToolHangfire(app);
+        app.Run(context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return Task.CompletedTask;
+        });
+        var httpContext = CreateRequest(app.ApplicationServices, "/jobs");
+        await app.Build()(httpContext);
+
+        // Assert
+        customFilter.Received(1).Authorize(Arg.Any<DashboardContext>());
+        Assert.Equal(StatusCodes.Status401Unauthorized, httpContext.Response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UseOptiPowerToolHangfire_EnableDashboardFalse_DoesNotMapDashboard()
+    {
+        // Arrange
+        var customFilter = Substitute.For<IDashboardAuthorizationFilter>();
+        var options = new OptiPowerToolHangfireOptions { EnableDashboard = false, DashboardPath = "/jobs" };
+        var app = new ApplicationBuilder(CreateDashboardServiceProvider(options, customFilter));
+
+        // Act
+        HangfireAppBuilderExtensions.UseOptiPowerToolHangfire(app);
+        app.Run(context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            return Task.CompletedTask;
+        });
+        var httpContext = CreateRequest(app.ApplicationServices, "/jobs");
+        await app.Build()(httpContext);
+
+        // Assert
+        customFilter.DidNotReceive().Authorize(Arg.Any<DashboardContext>());
+        Assert.Equal(StatusCodes.Status404NotFound, httpContext.Response.StatusCode);
+    }
+
+    private static ServiceProvider CreateDashboardServiceProvider(
+        OptiPowerToolHangfireOptions options,
+        IDashboardAuthorizationFilter customFilter)
+    {
+        var optionsWrapper = Substitute.For<IOptions<OptiPowerToolHangfireOptions>>();
+        optionsWrapper.Value.Returns(options);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddHangfire(_ => { });
+        services.AddSingleton(Substitute.For<JobStorage>());
+        services.AddSingleton(optionsWrapper);
+        services.AddSingleton(new OptimizelyDashboardAuthorizationFilter(optionsWrapper));
+        services.AddSingleton(customFilter);
+
+        return services.BuildServiceProvider();
+    }
+
+    private static DefaultHttpContext CreateRequest(IServiceProvider services, string path) =>
+        new()
+        {
+            RequestServices = services,
+            Request = { Path = path, Method = HttpMethods.Get }
+        };
 }
