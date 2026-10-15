@@ -27,11 +27,13 @@ public class WaitForOtherJobsAttributeTests
 
     private class TestableWaitForOtherJobs(params Type[] jobTypes) : WaitForOtherJobsAttribute(jobTypes)
     {
-        public bool RescheduleJobCalled { get; private set; }
+        public bool RescheduleJobCalled => RescheduleJobCallCount > 0;
+
+        public int RescheduleJobCallCount { get; private set; }
 
         protected override void RescheduleJob(PerformingContext context)
         {
-            RescheduleJobCalled = true;
+            RescheduleJobCallCount++;
             context.Canceled = true;
         }
     }
@@ -68,10 +70,15 @@ public class WaitForOtherJobsAttributeTests
     }
 
     private static JobStorage CreateStorageWithProcessingJobs(
+        params KeyValuePair<string, ProcessingJobDto>[] processingJobs) =>
+        CreateStorageWithProcessingJobs(out _, processingJobs);
+
+    private static JobStorage CreateStorageWithProcessingJobs(
+        out IMonitoringApi monitoringApi,
         params KeyValuePair<string, ProcessingJobDto>[] processingJobs)
     {
         var storage = Substitute.For<JobStorage>();
-        var monitoringApi = Substitute.For<IMonitoringApi>();
+        monitoringApi = Substitute.For<IMonitoringApi>();
         monitoringApi.ProcessingJobs(Arg.Any<int>(), Arg.Any<int>())
             .Returns(new JobList<ProcessingJobDto>(processingJobs));
         storage.GetMonitoringApi().Returns(monitoringApi);
@@ -261,5 +268,98 @@ public class WaitForOtherJobsAttributeTests
         var filter = new WaitForOtherJobsAttribute(typeof(StubJobA)) { MaxJobsToCheck = 500 };
 
         Assert.Equal(500, filter.MaxJobsToCheck);
+    }
+
+    [Fact]
+    public void OnPerforming_EmptyJobTypes_DoesNotQueryMonitoringApi()
+    {
+        var storage = CreateStorageWithProcessingJobs();
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new TestableWaitForOtherJobs();
+
+        filter.OnPerforming(context);
+
+        storage.DidNotReceive().GetMonitoringApi();
+    }
+
+    [Fact]
+    public void OnPerforming_EmptyPage_StopsPaging()
+    {
+        var storage = CreateStorageWithProcessingJobs(out var monitoringApi);
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new TestableWaitForOtherJobs(typeof(StubJobA));
+
+        filter.OnPerforming(context);
+
+        monitoringApi.Received(1).ProcessingJobs(Arg.Any<int>(), Arg.Any<int>());
+        monitoringApi.Received(1).ProcessingJobs(0, 50);
+    }
+
+    [Fact]
+    public void OnPerforming_NoConflict_PagesUpToMaxJobsToCheck()
+    {
+        var storage = CreateStorageWithProcessingJobs(
+            out var monitoringApi,
+            CreateProcessingJob("other-job", typeof(StubJobB)));
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new TestableWaitForOtherJobs(typeof(StubJobA)) { MaxJobsToCheck = 120 };
+
+        filter.OnPerforming(context);
+
+        monitoringApi.Received(3).ProcessingJobs(Arg.Any<int>(), Arg.Any<int>());
+        monitoringApi.Received(1).ProcessingJobs(0, 50);
+        monitoringApi.Received(1).ProcessingJobs(50, 50);
+        monitoringApi.Received(1).ProcessingJobs(100, 20);
+        Assert.False(filter.RescheduleJobCalled);
+    }
+
+    [Fact]
+    public void OnPerforming_MaxJobsToCheckIsMultipleOfPageSize_DoesNotRequestEmptyPage()
+    {
+        var storage = CreateStorageWithProcessingJobs(
+            out var monitoringApi,
+            CreateProcessingJob("other-job", typeof(StubJobB)));
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new TestableWaitForOtherJobs(typeof(StubJobA)) { MaxJobsToCheck = 50 };
+
+        filter.OnPerforming(context);
+
+        monitoringApi.Received(1).ProcessingJobs(Arg.Any<int>(), Arg.Any<int>());
+        monitoringApi.Received(1).ProcessingJobs(0, 50);
+    }
+
+    [Fact]
+    public void OnPerforming_ConflictOnFirstPage_ReschedulesOnceAndStopsPaging()
+    {
+        var storage = CreateStorageWithProcessingJobs(
+            out var monitoringApi,
+            CreateProcessingJob("other-job", typeof(StubJobA)));
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new TestableWaitForOtherJobs(typeof(StubJobA)) { MaxJobsToCheck = 120 };
+
+        filter.OnPerforming(context);
+
+        Assert.Equal(1, filter.RescheduleJobCallCount);
+        monitoringApi.Received(1).ProcessingJobs(Arg.Any<int>(), Arg.Any<int>());
+    }
+
+    [Fact]
+    public void OnPerforming_Conflict_ReschedulesJobWithRetryDelayAndReason()
+    {
+        var storage = CreateStorageWithProcessingJobs(
+            CreateProcessingJob("other-job", typeof(StubJobA)));
+        var transaction = RescheduleTestHelper.SetUpStateChange(storage, "current-job-id");
+        var context = CreatePerformingContext(storage: storage);
+        var filter = new WaitForOtherJobsAttribute(typeof(StubJobA), typeof(StubJobB)) { RetryDelaySeconds = 42 };
+
+        filter.OnPerforming(context);
+
+        Assert.True(context.Canceled);
+        var state = RescheduleTestHelper.GetAppliedScheduledState(transaction, "current-job-id");
+        Assert.Equal("Waiting for other jobs to complete: StubJobA, StubJobB", state.Reason);
+        Assert.InRange(
+            state.EnqueueAt - DateTime.UtcNow,
+            TimeSpan.FromSeconds(40),
+            TimeSpan.FromSeconds(42));
     }
 }

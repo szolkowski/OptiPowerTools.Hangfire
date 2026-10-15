@@ -51,7 +51,10 @@ public class RetainOnSuccessAttributeTests
     [Fact]
     public void Constructor_WithZeroValue_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new RetainOnSuccessAttribute(0));
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => new RetainOnSuccessAttribute(0));
+
+        Assert.Equal("retentionDays", exception.ParamName);
+        Assert.StartsWith("Value must be positive.", exception.Message);
     }
 
     [Fact]

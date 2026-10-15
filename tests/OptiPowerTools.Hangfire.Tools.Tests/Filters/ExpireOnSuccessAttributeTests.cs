@@ -51,7 +51,10 @@ public class ExpireOnSuccessAttributeTests
     [Fact]
     public void Constructor_WithNegativeValue_ThrowsArgumentOutOfRangeException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new ExpireOnSuccessAttribute(-1));
+        var exception = Assert.Throws<ArgumentOutOfRangeException>(() => new ExpireOnSuccessAttribute(-1));
+
+        Assert.Equal("expirationSeconds", exception.ParamName);
+        Assert.StartsWith("Value must be non-negative.", exception.Message);
     }
 
     [Fact]

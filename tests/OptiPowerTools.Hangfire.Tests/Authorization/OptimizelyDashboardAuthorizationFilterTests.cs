@@ -1,4 +1,8 @@
 using System.Security.Claims;
+using Hangfire;
+using Hangfire.Dashboard;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using OptiPowerTools.Hangfire.Authorization;
@@ -115,4 +119,32 @@ public class OptimizelyDashboardAuthorizationFilterTests
 
         Assert.False(filter.IsAuthorized(user));
     }
+
+    [Fact]
+    public void Authorize_AuthorizedUser_ReturnsTrue()
+    {
+        var filter = CreateFilter();
+        var context = CreateDashboardContext(CreatePrincipal(isAuthenticated: true, "Administrators"));
+
+        Assert.True(filter.Authorize(context));
+    }
+
+    [Fact]
+    public void Authorize_UnauthorizedUser_ReturnsFalse()
+    {
+        var filter = CreateFilter();
+        var context = CreateDashboardContext(CreatePrincipal(isAuthenticated: true, "Editors"));
+
+        Assert.False(filter.Authorize(context));
+    }
+
+    private static DashboardContext CreateDashboardContext(ClaimsPrincipal user) =>
+        new AspNetCoreDashboardContext(
+            Substitute.For<JobStorage>(),
+            new DashboardOptions(),
+            new DefaultHttpContext
+            {
+                User = user,
+                RequestServices = new ServiceCollection().BuildServiceProvider()
+            });
 }

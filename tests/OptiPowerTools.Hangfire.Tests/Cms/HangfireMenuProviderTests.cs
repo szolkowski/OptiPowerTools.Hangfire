@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using EPiServer.Shell.Navigation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
@@ -10,13 +11,28 @@ namespace OptiPowerTools.Hangfire.Tests.Cms;
 public class HangfireMenuProviderTests
 {
     private static HangfireMenuProvider CreateProvider(
-        OptiPowerToolHangfireOptions? optiOptions = null)
+        OptiPowerToolHangfireOptions? optiOptions = null,
+        HttpContext? httpContext = null)
     {
         var opts = optiOptions ?? new OptiPowerToolHangfireOptions();
         var options = Substitute.For<IOptions<OptiPowerToolHangfireOptions>>();
         options.Value.Returns(opts);
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+        httpContextAccessor.HttpContext.Returns(httpContext);
         return new HangfireMenuProvider(options, httpContextAccessor);
+    }
+
+    private static HttpContext CreateHttpContext(bool isAuthenticated, params string[] roles)
+    {
+        var claims = new List<Claim>();
+        if (isAuthenticated)
+            claims.Add(new Claim(ClaimTypes.Name, "testuser"));
+
+        foreach (var role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
+
+        var identity = new ClaimsIdentity(claims, isAuthenticated ? "TestAuth" : null);
+        return new DefaultHttpContext { User = new ClaimsPrincipal(identity) };
     }
 
     // === CmsSection (default, backward-compatible) ===
@@ -581,5 +597,93 @@ public class HangfireMenuProviderTests
         var items = provider.GetMenuItems();
 
         Assert.Empty(items);
+    }
+
+    // === Empty CustomSectionName falls back to DashboardTitle ===
+
+    [Theory]
+    [InlineData(CmsMenuPlacement.TopLevel)]
+    [InlineData(CmsMenuPlacement.CustomSection)]
+    public void GetMenuItems_EmptyCustomSectionName_SectionFallsBackToDashboardTitle(CmsMenuPlacement placement)
+    {
+        var options = new OptiPowerToolHangfireOptions
+        {
+            MenuPlacement = placement,
+            CustomSectionName = string.Empty,
+            DashboardTitle = "Background Jobs"
+        };
+        var provider = CreateProvider(options);
+
+        var section = provider.GetMenuItems().First();
+
+        Assert.Equal("Background Jobs", section.Text);
+        Assert.Equal(MenuPaths.Global + "/background-jobs", section.Path);
+    }
+
+    // === IsAvailable (authorization) ===
+
+    public static TheoryData<CmsMenuPlacement> AllPlacements =>
+    [
+        CmsMenuPlacement.CmsSection,
+        CmsMenuPlacement.TopLevel,
+        CmsMenuPlacement.CustomSection
+    ];
+
+    [Theory]
+    [MemberData(nameof(AllPlacements))]
+    public void GetMenuItems_AuthorizedUser_AllItemsAvailable(CmsMenuPlacement placement)
+    {
+        var httpContext = CreateHttpContext(isAuthenticated: true, "CmsAdmins");
+        var provider = CreateProvider(new OptiPowerToolHangfireOptions { MenuPlacement = placement }, httpContext);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.All(items, item => Assert.True(item.IsAvailable(httpContext)));
+    }
+
+    [Theory]
+    [MemberData(nameof(AllPlacements))]
+    public void GetMenuItems_UnauthenticatedUser_NoItemsAvailable(CmsMenuPlacement placement)
+    {
+        var httpContext = CreateHttpContext(isAuthenticated: false, "CmsAdmins");
+        var provider = CreateProvider(new OptiPowerToolHangfireOptions { MenuPlacement = placement }, httpContext);
+
+        var items = provider.GetMenuItems().ToList();
+
+        Assert.All(items, item => Assert.False(item.IsAvailable(httpContext)));
+    }
+
+    [Fact]
+    public void GetMenuItems_AuthenticatedUserWithoutAuthorizedRole_ItemNotAvailable()
+    {
+        var httpContext = CreateHttpContext(isAuthenticated: true, "Editors");
+        var provider = CreateProvider(httpContext: httpContext);
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.False(item.IsAvailable(httpContext));
+    }
+
+    [Fact]
+    public void GetMenuItems_UserInOneOfSeveralAuthorizedRoles_ItemAvailable()
+    {
+        var httpContext = CreateHttpContext(isAuthenticated: true, "WebAdmins");
+        var provider = CreateProvider(
+            new OptiPowerToolHangfireOptions { AuthorizedRoles = ["Administrators", "WebAdmins"] },
+            httpContext);
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.True(item.IsAvailable(httpContext));
+    }
+
+    [Fact]
+    public void GetMenuItems_NoHttpContext_ItemNotAvailable()
+    {
+        var provider = CreateProvider();
+
+        var item = provider.GetMenuItems().Single();
+
+        Assert.False(item.IsAvailable(new DefaultHttpContext()));
     }
 }
