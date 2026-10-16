@@ -9,6 +9,8 @@ A one-liner bootstrap for adding [Hangfire](https://www.hangfire.io/) background
 
 This package was inspired by community feedback on the blog post [Adding Hangfire to Optimizely CMS 12](https://szolkowski.github.io/2024/07/31/adding-hangfire-to-epi-12.html), which walked through the manual steps of integrating Hangfire with Optimizely. The recurring request for a ready-made, drop-in solution led to this library — turning what was a multi-step manual setup into a simple, drop-in integration.
 
+Part of the [OptiPowerTools](https://github.com/szolkowski) family — see also [OptiPowerTools.ScheduledJobsInsights](https://github.com/szolkowski/OptiPowerTools.ScheduledJobsInsights) for execution history, logs and metrics of native Optimizely scheduled jobs, if some of your jobs run on Optimizely's built-in scheduler instead of (or alongside) Hangfire.
+
 ## Features
 
 - Single extension method to register Hangfire with SQL Server storage and background server
